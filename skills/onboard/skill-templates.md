@@ -71,11 +71,12 @@ Present the brief in this structure:
 | `{{user_name}}` | Q1: Name |
 | `{{google_calendar_connected}}` | Phase 1: Tool connection |
 | `{{gmail_connected}}` | Phase 1: Tool connection |
-| `{{priority_contacts_or_categories}}` | Derived from Q3 (daily focus) and Q11 (daily tasks) — e.g., if they do client work, prioritize client emails |
+| `{{priority_contacts_or_categories}}` | Derived from Q3 (daily focus), Q11 (daily tasks), and Q13 (tool stack) — e.g., if they do client work, prioritize client emails |
 | `{{daily_tasks}}` | Q11: Daily repeated tasks |
 | `{{output_format_instructions}}` | Q9: Output preferences — translate choice into instructions (e.g., "Use concise bullets, no fluff") |
 | `{{voice_instructions}}` | Q7: Voice character — translate into instruction (e.g., "Keep it warm and friendly, like a helpful colleague") |
 | `{{hard_rules}}` | Q10: Hard rules that apply to morning briefs |
+| `{{tool_preferences}}` | Q13: Tool-specific preferences (e.g., "Check Notion for project status", "Meeting notes are in Granola") |
 
 ### Important Notes
 
@@ -157,10 +158,11 @@ Group by priority level. Urgent first, then Important, then FYI.
 | `{{urgent_examples}}` | Derived from role + daily tasks — e.g., "Client asking about a deadline, team member blocked on your input" |
 | `{{important_examples}}` | Derived from role — e.g., "New lead inquiry, collaboration request, feedback on draft" |
 | `{{fyi_examples}}` | Generic + role-specific — e.g., "Industry news, team updates, event invitations" |
-| `{{categorization_rules}}` | Derived from Q2 (business), Q3 (focus), Q10 (rules), Q11 (daily tasks) |
+| `{{categorization_rules}}` | Derived from Q2 (business), Q3 (focus), Q10 (rules), Q11 (daily tasks), Q13 (tool stack + preferences) |
 | `{{output_format_instructions}}` | Q9: Output preferences |
 | `{{voice_instructions}}` | Q7: Voice character |
 | `{{hard_rules}}` | Q10: Hard rules that apply to email handling |
+| `{{tool_context}}` | Q13: Tool-specific context (e.g., "Client comms on Slack not email", "Check Notion for project status") |
 
 ### Important Notes
 

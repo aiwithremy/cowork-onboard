@@ -50,18 +50,19 @@ This lets you refresh individual sections (about me, voice DNA, working style, t
 
 ## What Gets Created
 
+**On your Desktop:**
 ```
-your-workspace/
+~/Desktop/OS/
   CLAUDE.md                          # Global instructions + self-correcting rules engine
   context/
     about-me.md                      # Identity, role, business, expertise
     voice-dna.md                     # Writing style, tone, samples, anti-patterns
     working-style.md                 # Output prefs, rules, tasks, full tool stack
-  .claude/
-    skills/
-      morning-brief/SKILL.md         # Personalized daily briefing
-      inbox-triage/SKILL.md          # Personalized email triage
 ```
+
+**Saved globally in Cowork** (via the Save Skill button):
+- Morning brief skill — personalized daily briefing
+- Inbox triage skill — personalized email triage
 
 ## Author
 

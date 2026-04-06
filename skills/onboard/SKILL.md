@@ -252,22 +252,36 @@ Load the full examples from the question bank.
 
 ---
 
-## Phase 4: Generate Files & Skills
+## Phase 4: Build the Workspace
 
-### Teach: What Context Files Are
+### Teach: What We're Creating
 
-> "**Here's what I'm building now — your context files.**
+> "**Now I'm going to build your workspace — a folder called OS (your operating system).**
 >
-> These are simple text files that live in your workspace folder. Every time you open this folder in Cowork, I automatically read them before we even start talking. It's like leaving yourself a set of notes that your AI reads before every conversation.
+> This is the folder you'll open in Cowork from now on. Every time you open it, I automatically read your context files before we even start talking. It's like leaving yourself a set of notes that your AI reads before every conversation.
 >
-> You'll have three:
-> - **about-me.md** — who you are (so I never ask 'what do you do?' again)
-> - **voice-dna.md** — how you write (so I sound like you, not like ChatGPT)
-> - **working-style.md** — your preferences, rules, and tool stack (so I work the way you want)
+> Inside OS, you'll have:
+> - **CLAUDE.md** — the master instructions file I read first every session
+> - **context/about-me.md** — who you are (so I never ask 'what do you do?' again)
+> - **context/voice-dna.md** — how you write (so I sound like you, not like ChatGPT)
+> - **context/working-style.md** — your preferences, rules, and tool stack (so I work the way you want)
 >
 > You can open and edit any of these files anytime. They're yours."
 
-### Step 1: Generate Context Files
+### Step 1: Create the OS Folder
+
+Create a folder called `OS` on the user's **Desktop** (`~/Desktop/OS/`) with a `context/` subfolder inside it. This is their workspace root — the folder they'll open in Cowork from now on.
+
+```
+~/Desktop/OS/
+  CLAUDE.md
+  context/
+    about-me.md
+    voice-dna.md
+    working-style.md
+```
+
+### Step 2: Generate Context Files
 
 Using the interview answers AND the deep discovery scan data, generate three files. **Show each file to the user before writing it.**
 
@@ -371,7 +385,7 @@ Generate from Q9-Q13. Structure:
 [any tool-specific rules or preferences from Q13, e.g., "Client comms only on Slack, never email"]
 ```
 
-### Step 2: Preview and Confirm
+### Step 3: Preview and Confirm
 
 Show each file one at a time:
 > "Here's your **About Me** context file: [show content]. Look good?"
@@ -381,9 +395,12 @@ Wait for confirmation before moving to the next. If they want changes, make them
 **For Voice DNA especially**: Show it and ask:
 > "Here's your **Voice DNA** — this is how I'll write as you from now on. Take a look at the writing samples and patterns. Anything I should adjust?"
 
-### Step 3: Write Context Files
+### Step 4: Write Context Files
 
-After all three are approved, create the `context/` directory and write all three files.
+After all three are approved, write them to `~/Desktop/OS/context/`:
+- `~/Desktop/OS/context/about-me.md`
+- `~/Desktop/OS/context/voice-dna.md`
+- `~/Desktop/OS/context/working-style.md`
 
 ### Teach: What CLAUDE.md Is
 
@@ -395,7 +412,7 @@ After all three are approved, create the `context/` directory and write all thre
 >
 > It also has something called a **self-correcting rules engine** — a section where I automatically record any mistakes I make or corrections you give me. So if you say 'don't do that', I write it down as a permanent rule. Over time, this workspace gets smarter the more you use it."
 
-### Step 4: Generate and Write CLAUDE.md
+### Step 5: Generate and Write CLAUDE.md
 
 Create the master instruction file with the self-correcting rules engine:
 
@@ -449,11 +466,11 @@ This section contains a growing ruleset that improves over time. **At session st
 [Rules will be added here as the user works with the workspace]
 ```
 
-Show preview and get confirmation. Write CLAUDE.md to the workspace root.
+Show preview and get confirmation. Write CLAUDE.md to `~/Desktop/OS/CLAUDE.md`.
 
 ### Teach: What Skills Are
 
-> "**Your workspace foundation is done. Now let's build on top of it with skills.**
+> "**Your workspace foundation is done. Now let's add skills on top of it.**
 >
 > A skill is a set of instructions that tells me how to do a specific task for you. Think of it like a recipe card. Right now, I can do anything you ask — but I'll do it generically. A skill makes me do it *your* way, with *your* tools, in *your* voice.
 >
@@ -463,14 +480,14 @@ Show preview and get confirmation. Write CLAUDE.md to the workspace root.
 >
 > 2. **Inbox Triage** — I read your unread emails, filter out the noise, and categorize what's left by urgency. You get a clean list of what actually needs your attention.
 >
-> These are personalized to your tools, your priorities, and your preferences. Let me build them."
+> **How skills work in Cowork:** Skills are saved globally in the Cowork app — not inside your OS folder. They're available across all your projects. I'll show you each skill in chat, and Cowork will give you a **'Save Skill' button** to save it. Just click that button for each one."
 
-### Step 5: Generate Personalized Skills
+### Step 6: Generate Personalized Skills
 
 Load `skill-templates.md` and generate two personalized skills.
 
 #### Morning Brief Skill
-Generate `.claude/skills/morning-brief/SKILL.md` using the template. Fill in:
+Generate the morning-brief skill using the template. Fill in:
 - Which tools are connected (calendar, email) — from Q13
 - Their daily tasks (Q11)
 - Their output preferences (Q9)
@@ -478,10 +495,10 @@ Generate `.claude/skills/morning-brief/SKILL.md` using the template. Fill in:
 - Relevant hard rules (Q10)
 - Tool preferences (Q13)
 
-**Replace all template placeholders with actual values.** The output should be a clean SKILL.md with no template syntax.
+**Replace all template placeholders with actual values.** The output should be a clean skill with no template syntax.
 
 #### Inbox Triage Skill
-Generate `.claude/skills/inbox-triage/SKILL.md` using the template. Fill in:
+Generate the inbox-triage skill using the template. Fill in:
 - Their role and business (Q1, Q2)
 - Their daily focus (Q3)
 - Their hard rules (Q10)
@@ -492,16 +509,28 @@ Generate `.claude/skills/inbox-triage/SKILL.md` using the template. Fill in:
 
 **Replace all template placeholders with actual values.**
 
-### Step 6: Preview Skills
+### Step 7: Present Skills for Saving
 
-Show each generated skill:
-> "Here's your personalized **Morning Brief** skill. This will check your [calendar/email/etc.] and give you a daily summary formatted the way you like it. Take a look: [show content]. Look right?"
+<IMPORTANT>
+Do NOT write skills to the filesystem. Cowork cannot create skill files in `.claude/skills/`. Instead, output each skill's full content directly in chat. Cowork will automatically show a "Save Skill" button that the user clicks to save it globally.
+</IMPORTANT>
 
-Wait for confirmation on each.
+For each skill:
 
-### Step 7: Write Skills
+1. Show the complete skill content in chat (the full SKILL.md content including YAML frontmatter)
+2. Tell the user: "You should see a **'Save Skill' button** above. Click it to save this skill to your Cowork app."
+3. Wait for them to confirm they saved it
+4. Then move to the next skill
 
-After both are approved, create `.claude/skills/morning-brief/SKILL.md` and `.claude/skills/inbox-triage/SKILL.md`.
+> "Here's your personalized **Morning Brief** skill. Click the **'Save Skill' button** that appears above to add it to your Cowork. Once it's saved, you can use it anytime by saying 'morning brief'."
+>
+> [output the full morning-brief skill content]
+
+After they confirm:
+
+> "Now here's your **Inbox Triage** skill. Same thing — click **'Save Skill'** to add it."
+>
+> [output the full inbox-triage skill content]
 
 ### Teach: What Scheduled Tasks Are
 
@@ -511,7 +540,7 @@ After both are approved, create `.claude/skills/morning-brief/SKILL.md` and `.cl
 >
 > Same for inbox triage — it can run a few times a day so your inbox is always pre-sorted."
 
-### Step 8: Set Up Scheduled Tasks
+### Step 8: Set up Scheduled Tasks
 
 Ask the user:
 > "What time do you usually start your day? I'll schedule your morning brief for then."
@@ -550,17 +579,13 @@ Load `skill-recommendation-map.md`. Based on Q3 (daily focus) and Q11/Q12 (tasks
 
 > "**Your workspace is ready! Here's what we built and why:**
 >
-> **Context files** (loaded automatically every session):
-> - `about-me.md` — so I always know who you are
-> - `voice-dna.md` — so I write like you, not like a robot
-> - `working-style.md` — your preferences, rules, and tool stack
+> **Your OS folder** (on your Desktop — open this in Cowork from now on):
+> - `CLAUDE.md` — master instructions, the first thing I read every session
+> - `context/about-me.md` — who you are
+> - `context/voice-dna.md` — how you write (with real writing samples)
+> - `context/working-style.md` — your preferences, rules, and tool stack
 >
-> **CLAUDE.md** (master instructions):
-> - Imports all your context files
-> - Contains your rules and the self-correcting rules engine
-> - This is the first thing I read every time we talk
->
-> **Skills** (personalized task instructions):
+> **Skills** (saved globally in Cowork, available everywhere):
 > - Morning brief — say 'morning brief' for a daily summary
 > - Inbox triage — say 'triage my inbox' to sort your email
 >
@@ -568,15 +593,16 @@ Load `skill-recommendation-map.md`. Based on Q3 (daily focus) and Q11/Q12 (tasks
 > - Morning brief: daily at [time]
 > - Inbox triage: [frequency]
 >
-> **How it gets better over time:**
-> Every time you correct me, I add a rule to CLAUDE.md. Every time you update a preference, the context files change. This workspace learns. It's not static — it grows with you.
+> **How to use it:** Close this chat, then open the **OS folder** in Cowork. That's your workspace from now on. Every new conversation will start with me already knowing who you are and how you work.
+>
+> **How it gets better over time:** Every time you correct me, I add a rule to CLAUDE.md. Every time you update a preference, the context files change. This workspace learns. It's not static — it grows with you.
 >
 > **Useful commands to remember:**
 > - `/update-context` — update any part of your workspace
 > - `morning brief` — run your daily briefing
 > - `triage my inbox` — sort your email
 >
-> You're all set. Try saying 'morning brief' to take it for a spin!"
+> You're all set. Open your OS folder and try saying 'morning brief' to take it for a spin!"
 
 ---
 

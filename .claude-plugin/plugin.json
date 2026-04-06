@@ -1,0 +1,11 @@
+{
+  "name": "cowork-onboard",
+  "description": "10-minute guided onboarding for Claude Cowork. Connects tools, interviews you about your business, and builds a personalized AI workspace.",
+  "version": "1.0.0",
+  "author": {
+    "name": "AI with Remy"
+  },
+  "homepage": "https://aiwithremy.com",
+  "license": "MIT",
+  "keywords": ["onboarding", "setup", "workspace", "context", "cowork"]
+}

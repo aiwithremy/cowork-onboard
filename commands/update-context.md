@@ -1,0 +1,25 @@
+---
+description: "Update specific parts of your workspace context"
+---
+
+Ask the user which section they want to update:
+
+1. **About me** — re-interview identity, role, business, expertise → regenerate `context/about-me.md`
+2. **Brand voice** — re-interview tone, language, anti-voice → regenerate `context/brand-voice.md`
+3. **Working style** — re-interview output preferences, rules, tasks → regenerate `context/working-style.md`
+4. **Morning brief skill** — update the personalized morning brief at `.claude/skills/morning-brief/SKILL.md`
+5. **Inbox triage skill** — update the personalized inbox triage at `.claude/skills/inbox-triage/SKILL.md`
+6. **Everything** — re-run the full onboarding (same as `/onboard`)
+
+For options 1-5: read the existing file first, show the user what's currently there, then use the `cowork-onboard:onboard` skill's support files to guide the update:
+- **About me** (option 1): load Section A from `interview-questions.md` for targeted questions
+- **Brand voice** (option 2): load Section B from `interview-questions.md`
+- **Working style** (option 3): load Section C from `interview-questions.md`
+- **Morning brief** (option 4): load `skill-templates.md` for the morning-brief template, re-ask relevant questions
+- **Inbox triage** (option 5): load `skill-templates.md` for the inbox-triage template, re-ask relevant questions
+
+Show the current content, ask targeted questions from the question bank, then regenerate only the selected file. Preview changes before writing.
+
+For option 6: use the `cowork-onboard:onboard` skill to run the full flow.
+
+After updating, also check if `CLAUDE.md` needs changes to reflect the updates.

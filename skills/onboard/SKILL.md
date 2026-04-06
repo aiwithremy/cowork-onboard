@@ -385,98 +385,17 @@ Wait for confirmation before moving to the next. If they want changes, make them
 
 After all three are approved, create the `context/` directory and write all three files.
 
-### Teach: What Skills Are
-
-> "**Next up — skills.**
->
-> A skill is a set of instructions that tells me how to do a specific task for you. Think of it like a recipe card. Right now, I can do anything you ask — but I'll do it generically. A skill makes me do it *your* way, with *your* tools, in *your* voice.
->
-> I'm going to create two skills based on what you told me:
->
-> 1. **Morning Brief** — a daily summary of your calendar, inbox, and priorities. Instead of you opening 5 tabs and checking everything manually, you just say 'morning brief' and I give you a single summary.
->
-> 2. **Inbox Triage** — I read your unread emails, filter out the noise, and categorize what's left by urgency. You get a clean list of what actually needs your attention.
->
-> These are personalized to your tools, your priorities, and your preferences. Let me build them."
-
-### Step 4: Generate Personalized Skills
-
-Load `skill-templates.md` and generate two personalized skills.
-
-#### Morning Brief Skill
-Generate `.claude/skills/morning-brief/SKILL.md` using the template. Fill in:
-- Which tools are connected (calendar, email) — from Q13
-- Their daily tasks (Q11)
-- Their output preferences (Q9)
-- Their voice character (Q7)
-- Relevant hard rules (Q10)
-- Tool preferences (Q13)
-
-**Replace all template placeholders with actual values.** The output should be a clean SKILL.md with no template syntax.
-
-#### Inbox Triage Skill
-Generate `.claude/skills/inbox-triage/SKILL.md` using the template. Fill in:
-- Their role and business (Q1, Q2)
-- Their daily focus (Q3)
-- Their hard rules (Q10)
-- Their daily tasks (Q11) — for categorization context
-- Their output preferences (Q9)
-- Their voice character (Q7)
-- Email tool preferences (Q13)
-
-**Replace all template placeholders with actual values.**
-
-### Step 5: Preview Skills
-
-Show each generated skill:
-> "Here's your personalized **Morning Brief** skill. This will check your [calendar/email/etc.] and give you a daily summary formatted the way you like it. Take a look: [show content]. Look right?"
-
-Wait for confirmation on each.
-
-### Step 6: Write Skills
-
-After both are approved, create `.claude/skills/morning-brief/SKILL.md` and `.claude/skills/inbox-triage/SKILL.md`.
-
-### Teach: What Scheduled Tasks Are
-
-> "**Now let's automate these.**
->
-> Right now you'd have to open Cowork and type 'morning brief' every day. But we can schedule it to run automatically — so when you sit down with your coffee, the brief is already waiting for you.
->
-> Same for inbox triage — it can run a few times a day so your inbox is always pre-sorted."
-
-### Step 7: Set Up Scheduled Tasks
-
-Ask the user:
-> "What time do you usually start your day? I'll schedule your morning brief for then."
-
-Then:
-> "And how often should I triage your inbox?"
-> - Once in the morning
-> - Morning and afternoon
-> - Three times: morning, midday, and evening
-
-Set up scheduled tasks using the `/schedule` skill. For each task, invoke `/schedule` with:
-- **Morning brief**: `create` a scheduled trigger that runs the `morning-brief` skill daily at their chosen time (e.g., "every day at 7am")
-- **Inbox triage**: `create` a scheduled trigger that runs the `inbox-triage` skill at their chosen frequency (e.g., "every day at 9am, 1pm, and 5pm")
-
-If the `/schedule` skill is not available, or scheduling fails, provide manual instructions: "Scheduling isn't set up yet, but you can run these anytime by saying 'morning brief' or 'triage my inbox'. You can set up automation later with the `/schedule` command."
-
----
-
-## Phase 5: Wrap-up
-
 ### Teach: What CLAUDE.md Is
 
-> "**Last thing — the master instructions file.**
+> "**Now for the most important file in your workspace — CLAUDE.md.**
 >
-> This is the most important file in your workspace. It's called `CLAUDE.md` and it's the first thing I read every single time you start a new conversation. It imports your context files and contains your rules.
+> This is your master instructions file. It's the very first thing I read every time you start a new conversation. It imports your context files (about-me, voice-dna, working-style) and contains your rules.
 >
 > Think of it like a briefing document. Before we talk about anything, I've already read: who you are, how you write, how you work, what tools you use, and what rules to follow. You never have to re-explain yourself.
 >
 > It also has something called a **self-correcting rules engine** — a section where I automatically record any mistakes I make or corrections you give me. So if you say 'don't do that', I write it down as a permanent rule. Over time, this workspace gets smarter the more you use it."
 
-### Generate CLAUDE.md
+### Step 4: Generate and Write CLAUDE.md
 
 Create the master instruction file with the self-correcting rules engine:
 
@@ -530,7 +449,88 @@ This section contains a growing ruleset that improves over time. **At session st
 [Rules will be added here as the user works with the workspace]
 ```
 
-Show preview and get confirmation.
+Show preview and get confirmation. Write CLAUDE.md to the workspace root.
+
+### Teach: What Skills Are
+
+> "**Your workspace foundation is done. Now let's build on top of it with skills.**
+>
+> A skill is a set of instructions that tells me how to do a specific task for you. Think of it like a recipe card. Right now, I can do anything you ask — but I'll do it generically. A skill makes me do it *your* way, with *your* tools, in *your* voice.
+>
+> I'm going to create two skills based on what you told me:
+>
+> 1. **Morning Brief** — a daily summary of your calendar, inbox, and priorities. Instead of you opening 5 tabs and checking everything manually, you just say 'morning brief' and I give you a single summary.
+>
+> 2. **Inbox Triage** — I read your unread emails, filter out the noise, and categorize what's left by urgency. You get a clean list of what actually needs your attention.
+>
+> These are personalized to your tools, your priorities, and your preferences. Let me build them."
+
+### Step 5: Generate Personalized Skills
+
+Load `skill-templates.md` and generate two personalized skills.
+
+#### Morning Brief Skill
+Generate `.claude/skills/morning-brief/SKILL.md` using the template. Fill in:
+- Which tools are connected (calendar, email) — from Q13
+- Their daily tasks (Q11)
+- Their output preferences (Q9)
+- Their voice character (Q7)
+- Relevant hard rules (Q10)
+- Tool preferences (Q13)
+
+**Replace all template placeholders with actual values.** The output should be a clean SKILL.md with no template syntax.
+
+#### Inbox Triage Skill
+Generate `.claude/skills/inbox-triage/SKILL.md` using the template. Fill in:
+- Their role and business (Q1, Q2)
+- Their daily focus (Q3)
+- Their hard rules (Q10)
+- Their daily tasks (Q11) — for categorization context
+- Their output preferences (Q9)
+- Their voice character (Q7)
+- Email tool preferences (Q13)
+
+**Replace all template placeholders with actual values.**
+
+### Step 6: Preview Skills
+
+Show each generated skill:
+> "Here's your personalized **Morning Brief** skill. This will check your [calendar/email/etc.] and give you a daily summary formatted the way you like it. Take a look: [show content]. Look right?"
+
+Wait for confirmation on each.
+
+### Step 7: Write Skills
+
+After both are approved, create `.claude/skills/morning-brief/SKILL.md` and `.claude/skills/inbox-triage/SKILL.md`.
+
+### Teach: What Scheduled Tasks Are
+
+> "**Now let's automate these.**
+>
+> Right now you'd have to open Cowork and type 'morning brief' every day. But we can schedule it to run automatically — so when you sit down with your coffee, the brief is already waiting for you.
+>
+> Same for inbox triage — it can run a few times a day so your inbox is always pre-sorted."
+
+### Step 8: Set Up Scheduled Tasks
+
+Ask the user:
+> "What time do you usually start your day? I'll schedule your morning brief for then."
+
+Then:
+> "And how often should I triage your inbox?"
+> - Once in the morning
+> - Morning and afternoon
+> - Three times: morning, midday, and evening
+
+Set up scheduled tasks using the `/schedule` skill. For each task, invoke `/schedule` with:
+- **Morning brief**: `create` a scheduled trigger that runs the `morning-brief` skill daily at their chosen time (e.g., "every day at 7am")
+- **Inbox triage**: `create` a scheduled trigger that runs the `inbox-triage` skill at their chosen frequency (e.g., "every day at 9am, 1pm, and 5pm")
+
+If the `/schedule` skill is not available, or scheduling fails, provide manual instructions: "Scheduling isn't set up yet, but you can run these anytime by saying 'morning brief' or 'triage my inbox'. You can set up automation later with the `/schedule` command."
+
+---
+
+## Phase 5: Wrap-up
 
 ### Skill Recommendations
 

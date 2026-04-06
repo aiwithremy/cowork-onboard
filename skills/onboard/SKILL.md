@@ -6,17 +6,21 @@ user-invocable: true
 
 # Cowork Onboard
 
-Guided 10-minute onboarding that builds a personalized AI workspace. Connects tools, deep-scans your existing content for voice and context, interviews you, generates personalized context files, creates custom skills, and sets up automation.
+Guided onboarding that builds a personalized AI workspace. This is both a setup tool AND an educational walkthrough. The user should finish understanding what they built and why each piece matters.
 
 <HARD-GATE>
 This is a GUIDED flow. Ask ONE question at a time. Wait for the user's response before proceeding. Never batch questions. Never skip steps. Never generate files without showing a preview first.
 
 Every question MUST include rich examples. Most users can't articulate what they want from scratch. Give them concrete examples to react to and riff on. Examples are not optional.
+
+EDUCATIONAL REQUIREMENT: Before each major phase, explain WHAT you're about to do, WHY it matters, and HOW it will help them. The user should never feel like they're clicking through a wizard they don't understand. They should leave this onboarding genuinely understanding how their AI workspace works.
 </HARD-GATE>
 
 ## Audience
 
 The user is likely a complete beginner to Claude Cowork. Assume zero technical knowledge. Keep language simple, warm, and encouraging. Never use jargon without explaining it.
+
+**This is a learning experience, not just a setup wizard.** Every step should leave the user understanding a concept they didn't understand before. By the end, they should be able to explain to someone else what their workspace does and why each file exists.
 
 ## Support Files
 
@@ -35,15 +39,23 @@ Check if this workspace already has onboarding files:
 - If `CLAUDE.md` exists AND `context/` folder exists → warn the user: "This workspace already has context files. Running onboarding will overwrite them. Want to continue, or would `/update-context` be better for updating specific sections?"
 - If no existing files → proceed directly
 
-## Phase 1: Welcome & Tool Connection (~2 min)
+---
+
+## Phase 1: Welcome & Tool Connection
 
 ### Welcome Message
 
-Start with something like:
-
-> "Hey! Let's get your AI workspace set up. This takes about 10 minutes and by the end, you'll have an AI assistant that knows your business, your voice, and your workflow.
+> "Hey! I'm going to walk you through setting up your AI workspace. This takes about 10 minutes, and by the end you'll have an AI assistant that genuinely knows your business, writes in your voice, and handles your recurring tasks.
 >
-> First, let's connect your tools so I can learn how you write and work."
+> I'll explain everything as we go, so you'll actually understand what we're building and why — not just click through a setup wizard."
+
+### Teach: Why Tools Come First
+
+> "**First things first — let's connect your tools.**
+>
+> Here's why this is step one: the more tools I have access to, the less you have to explain to me. If I can read your emails, I can learn how you actually write. If I can see your calendar, I can build you a morning briefing. If I can search your docs, I can find your brand guidelines instead of making you describe them from memory.
+>
+> Think of it this way: right now I'm a new hire on day one. Connecting tools is like giving me access to the company drives, email, and Slack. Without that, I'm working blind."
 
 ### Tool Selection
 
@@ -74,14 +86,23 @@ For each tool they selected, load the relevant section from `mcp-setup-guide.md`
 4. Confirm success: "Connected! I can see your [files/emails/events]. Moving on."
 5. If it fails: Try one troubleshooting step. If still failing: "No worries — we can connect this later. Let's keep going."
 
-If they chose "None / I'll add later", that's fine. Say: "No problem! We can connect tools anytime. Let's move on to learning about you."
+If they chose "None / I'll add later", that's fine. Say: "No problem! The onboarding will still work — I'll just ask you more questions instead of pulling from your existing stuff. You can connect tools anytime later."
 
 ### Transition
-"Great, tools are sorted. Now let me dig through your connected tools to learn how you write and work. This takes a minute."
 
-## Phase 2: Deep Discovery Scan (~2 min)
+> "Great, tools are connected. Now let me put them to work. I'm going to dig through your emails, docs, and messages to learn how you write and what your business is about. This saves you from having to explain everything from scratch."
 
-This phase is critical. The more context we pull now, the less the user has to explain. Search aggressively across all connected tools.
+---
+
+## Phase 2: Deep Discovery Scan
+
+### Teach: What's Happening and Why
+
+> "**Here's what I'm doing right now:**
+>
+> I'm reading through your recent sent emails to learn your writing style — how you greet people, how formal or casual you are, what phrases you use. I'm also searching your Drive and Notion for any brand guides, SOPs, or business docs that already describe who you are and how you work.
+>
+> **Why this matters:** In a few minutes, I'm going to create a 'Voice DNA' file — a detailed profile of how you write, so that every time you use this workspace, I sound like you, not like a generic AI. The more real examples I can pull now, the more accurate that voice profile will be."
 
 ### What to Search For
 
@@ -166,7 +187,20 @@ If nothing found (no tools connected or no useful content):
 ### Hold All Scan Results
 Keep everything — writing samples, patterns, documents — in context. These feed directly into Phase 3 pre-fills and Phase 4 file generation.
 
-## Phase 3: Core Interview (~5 min)
+---
+
+## Phase 3: Core Interview
+
+### Teach: What We're Building
+
+> "**Now for the interview.** I'm going to ask you about 13 questions — who you are, how you want me to sound, how you work, and what tools you use. Don't worry about getting everything perfect — you can update any of this later with `/update-context`.
+>
+> **What these answers become:** I'll turn your answers into three files that live in your workspace:
+> 1. **About Me** — so I always know your role, business, and expertise
+> 2. **Voice DNA** — so I write like you, not like a robot
+> 3. **Working Style** — so I know your preferences, rules, daily tasks, and tools
+>
+> **Why files, not just memory?** These files load automatically every time you open this workspace. You can read them, edit them, and they're always up to date. It's like an employee handbook, but for your AI."
 
 Load `interview-questions.md` for the full question bank, including all examples. Follow these rules:
 
@@ -186,21 +220,52 @@ Transition: "Let's start with the basics — who you are and what you do."
 Ask Q1 through Q4 from `interview-questions.md`, one at a time. Each question has examples — always share them.
 
 #### Section B: Your Voice DNA (Q5-Q8)
-Transition: "Now let's nail down how I should sound when I write for you. I already have a head start from your emails."
+
+Transition — teach what Voice DNA is:
+> "**Now for the fun part — your Voice DNA.**
+>
+> This is a profile of how you actually write. Not a brand guide — your personal writing fingerprint. I already have a head start from your emails. The next few questions will sharpen it.
+>
+> **Why this matters:** Without Voice DNA, every AI workspace sounds the same — polished, generic, corporate. With it, when I draft an email or write a social post for you, it sounds like *you* wrote it. People who get that email won't be able to tell the difference."
 
 Ask Q5 through Q8 from `interview-questions.md`, one at a time. These should be heavily pre-filled from the discovery scan. Show actual writing samples for every voice-related question.
 
 #### Section C: How You Work (Q9-Q13)
-Transition: "Last section — how you like to work, your rules, and your tools."
+
+Transition:
+> "Last section — how you like to work, your rules, and your tools."
 
 Ask Q9 through Q13 from `interview-questions.md`, one at a time.
 
-**Q13 (Tool Stack) is new and important.** This produces a clear reference table of every tool they use and how. Load the full examples from the question bank.
+**Q13 (Tool Stack) is important.** Teach why:
+> "**One more — let's map out your tools.**
+>
+> This creates a reference sheet so I always know where to look for information. Instead of asking you 'where are your meeting notes?', I'll already know they're in Granola. Instead of emailing a client, I'll know you only do client comms on Slack.
+>
+> The goal: reduce the number of times I have to interrupt you with a question."
+
+Load the full examples from the question bank.
 
 ### After the Interview
-"That's all the questions! Now let me put together your workspace."
 
-## Phase 4: Generate Files & Skills (~2 min)
+> "That's all the questions! Now I'm going to turn everything you told me into your workspace files. I'll show you each one before I save it."
+
+---
+
+## Phase 4: Generate Files & Skills
+
+### Teach: What Context Files Are
+
+> "**Here's what I'm building now — your context files.**
+>
+> These are simple text files that live in your workspace folder. Every time you open this folder in Cowork, I automatically read them before we even start talking. It's like leaving yourself a set of notes that your AI reads before every conversation.
+>
+> You'll have three:
+> - **about-me.md** — who you are (so I never ask 'what do you do?' again)
+> - **voice-dna.md** — how you write (so I sound like you, not like ChatGPT)
+> - **working-style.md** — your preferences, rules, and tool stack (so I work the way you want)
+>
+> You can open and edit any of these files anytime. They're yours."
 
 ### Step 1: Generate Context Files
 
@@ -320,6 +385,20 @@ Wait for confirmation before moving to the next. If they want changes, make them
 
 After all three are approved, create the `context/` directory and write all three files.
 
+### Teach: What Skills Are
+
+> "**Next up — skills.**
+>
+> A skill is a set of instructions that tells me how to do a specific task for you. Think of it like a recipe card. Right now, I can do anything you ask — but I'll do it generically. A skill makes me do it *your* way, with *your* tools, in *your* voice.
+>
+> I'm going to create two skills based on what you told me:
+>
+> 1. **Morning Brief** — a daily summary of your calendar, inbox, and priorities. Instead of you opening 5 tabs and checking everything manually, you just say 'morning brief' and I give you a single summary.
+>
+> 2. **Inbox Triage** — I read your unread emails, filter out the noise, and categorize what's left by urgency. You get a clean list of what actually needs your attention.
+>
+> These are personalized to your tools, your priorities, and your preferences. Let me build them."
+
 ### Step 4: Generate Personalized Skills
 
 Load `skill-templates.md` and generate two personalized skills.
@@ -350,7 +429,7 @@ Generate `.claude/skills/inbox-triage/SKILL.md` using the template. Fill in:
 ### Step 5: Preview Skills
 
 Show each generated skill:
-> "Here's your personalized **Morning Brief** skill: [show content]. This will check your [calendar/email/etc.] and give you a daily summary. Look right?"
+> "Here's your personalized **Morning Brief** skill. This will check your [calendar/email/etc.] and give you a daily summary formatted the way you like it. Take a look: [show content]. Look right?"
 
 Wait for confirmation on each.
 
@@ -358,13 +437,21 @@ Wait for confirmation on each.
 
 After both are approved, create `.claude/skills/morning-brief/SKILL.md` and `.claude/skills/inbox-triage/SKILL.md`.
 
+### Teach: What Scheduled Tasks Are
+
+> "**Now let's automate these.**
+>
+> Right now you'd have to open Cowork and type 'morning brief' every day. But we can schedule it to run automatically — so when you sit down with your coffee, the brief is already waiting for you.
+>
+> Same for inbox triage — it can run a few times a day so your inbox is always pre-sorted."
+
 ### Step 7: Set Up Scheduled Tasks
 
 Ask the user:
-> "I can set these up to run automatically. What time do you usually start your day?"
+> "What time do you usually start your day? I'll schedule your morning brief for then."
 
 Then:
-> "And how often should I check your inbox? A few options:"
+> "And how often should I triage your inbox?"
 > - Once in the morning
 > - Morning and afternoon
 > - Three times: morning, midday, and evening
@@ -375,7 +462,19 @@ Set up scheduled tasks using the `/schedule` skill. For each task, invoke `/sche
 
 If the `/schedule` skill is not available, or scheduling fails, provide manual instructions: "Scheduling isn't set up yet, but you can run these anytime by saying 'morning brief' or 'triage my inbox'. You can set up automation later with the `/schedule` command."
 
-## Phase 5: Wrap-up (~1 min)
+---
+
+## Phase 5: Wrap-up
+
+### Teach: What CLAUDE.md Is
+
+> "**Last thing — the master instructions file.**
+>
+> This is the most important file in your workspace. It's called `CLAUDE.md` and it's the first thing I read every single time you start a new conversation. It imports your context files and contains your rules.
+>
+> Think of it like a briefing document. Before we talk about anything, I've already read: who you are, how you write, how you work, what tools you use, and what rules to follow. You never have to re-explain yourself.
+>
+> It also has something called a **self-correcting rules engine** — a section where I automatically record any mistakes I make or corrections you give me. So if you say 'don't do that', I write it down as a permanent rule. Over time, this workspace gets smarter the more you use it."
 
 ### Generate CLAUDE.md
 
@@ -437,44 +536,62 @@ Show preview and get confirmation.
 
 Load `skill-recommendation-map.md`. Based on Q3 (daily focus) and Q11/Q12 (tasks), recommend 2-3 relevant skills:
 
-> "Based on what you do, these skills would pair well with your workspace:
-> 1. **[skill]** — [what it does for them]
+> "**One more thing — skill recommendations.**
+>
+> Remember how we created the morning brief and inbox triage skills? There are loads more you can add. Based on what you do day-to-day, these would be useful:
+>
+> 1. **[skill]** — [what it does for them, in plain language]
 > 2. **[skill]** — [what it does for them]
 > 3. **[skill]** — [what it does for them]
 >
-> These are optional — you can install them anytime."
+> These are optional — you can install them anytime by asking me."
 
-### Summary
+### Summary and Education Recap
 
-Present the final summary:
-
-> "Your workspace is ready!
+> "**Your workspace is ready! Here's what we built and why:**
 >
-> **Created:**
-> - `context/about-me.md` — who you are
-> - `context/voice-dna.md` — how you sound (with real writing samples)
-> - `context/working-style.md` — how you work + your full tool stack
-> - `CLAUDE.md` — your global instructions + self-correcting rules engine
-> - Morning brief skill — personalized daily summary
-> - Inbox triage skill — email categorization
+> **Context files** (loaded automatically every session):
+> - `about-me.md` — so I always know who you are
+> - `voice-dna.md` — so I write like you, not like a robot
+> - `working-style.md` — your preferences, rules, and tool stack
 >
-> **Scheduled:**
+> **CLAUDE.md** (master instructions):
+> - Imports all your context files
+> - Contains your rules and the self-correcting rules engine
+> - This is the first thing I read every time we talk
+>
+> **Skills** (personalized task instructions):
+> - Morning brief — say 'morning brief' for a daily summary
+> - Inbox triage — say 'triage my inbox' to sort your email
+>
+> **Scheduled automation:**
 > - Morning brief: daily at [time]
 > - Inbox triage: [frequency]
 >
-> **How the rules engine works:** Every time you correct me, I'll add a rule to your CLAUDE.md so I never make the same mistake twice. Your workspace gets smarter the more you use it.
+> **How it gets better over time:**
+> Every time you correct me, I add a rule to CLAUDE.md. Every time you update a preference, the context files change. This workspace learns. It's not static — it grows with you.
 >
-> You're all set. Try saying 'morning brief' to test it out!"
+> **Useful commands to remember:**
+> - `/update-context` — update any part of your workspace
+> - `morning brief` — run your daily briefing
+> - `triage my inbox` — sort your email
+>
+> You're all set. Try saying 'morning brief' to take it for a spin!"
+
+---
 
 ## Tone Guidelines
 
 Throughout the entire onboarding:
 - **Warm but not cheesy.** Friendly, professional, encouraging.
+- **Teacher mode.** Explain concepts clearly, use analogies, make sure they understand before moving on.
 - **Brief acknowledgments.** "Got it." "Perfect." "Makes sense." — not "That's a wonderful answer!"
-- **No jargon.** Say "tools" not "MCPs". Say "instructions file" not "CLAUDE.md" (until they need to know).
+- **No jargon.** Say "tools" not "MCPs". Say "instructions file" not "CLAUDE.md" (until you explain it). Say "recipe card" not "skill" (until you explain it).
+- **Explain jargon when you introduce it.** When you first use a term like "context file" or "skill", explain what it means in plain language.
 - **Encouraging.** "You're doing great" if they seem hesitant. But don't overdo it.
-- **Respect their time.** Keep moving. Don't over-explain things that are working.
+- **Respect their time.** Keep educational moments concise — 2-4 sentences, not lectures. Teach through doing, not through essays.
 - **Show, don't ask.** Wherever possible, show what you found and ask them to confirm, rather than asking them to explain from scratch.
+- **Use analogies.** "Like a new hire's first day", "Like a recipe card", "Like a briefing document". Real-world comparisons land better than abstract explanations.
 
 ## Error Handling
 
@@ -485,3 +602,4 @@ Throughout the entire onboarding:
 - **User wants to skip a question**: Skip it. Use reasonable defaults or leave the section minimal.
 - **User wants to stop mid-flow**: Save progress so far. Tell them they can resume with `/onboard` or refine with `/update-context`.
 - **Scheduling fails**: Provide manual instructions as fallback
+- **User seems confused**: Pause and re-explain the current concept. Ask "Does that make sense?" before continuing.

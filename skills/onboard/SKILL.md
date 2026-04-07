@@ -419,9 +419,7 @@ Create the master instruction file with the self-correcting rules engine:
 ```markdown
 # [Name]'s AI Workspace
 
-@context/about-me.md
-@context/voice-dna.md
-@context/working-style.md
+@context/
 
 ## Instructions
 

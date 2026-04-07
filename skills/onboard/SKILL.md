@@ -262,15 +262,16 @@ Load the full examples from the question bank.
 >
 > Inside OS, you'll have:
 > - **CLAUDE.md** — the master instructions file I read first every session
-> - **context/about-me.md** — who you are (so I never ask 'what do you do?' again)
-> - **context/voice-dna.md** — how you write (so I sound like you, not like ChatGPT)
-> - **context/working-style.md** — your preferences, rules, and tool stack (so I work the way you want)
+> - **context/** — your knowledge base (who you are, how you write, how you work)
+> - **active/** — where all generated output goes (research, drafts, exports, anything I create)
+>
+> The **context** folder is your second brain — it's the source of truth about you and your business. Before I do anything, I check there first. The **active** folder keeps your workspace clean — instead of files piling up everywhere, everything I generate goes into organised subfolders inside active/.
 >
 > You can open and edit any of these files anytime. They're yours."
 
 ### Step 1: Create the OS Folder
 
-Create a folder called `OS` on the user's **Desktop** (`~/Desktop/OS/`) with a `context/` subfolder inside it. This is their workspace root — the folder they'll open in Cowork from now on.
+Create a folder called `OS` on the user's **Desktop** (`~/Desktop/OS/`) with `context/` and `active/` subfolders inside it. This is their workspace root — the folder they'll open in Cowork from now on.
 
 ```
 ~/Desktop/OS/
@@ -279,6 +280,7 @@ Create a folder called `OS` on the user's **Desktop** (`~/Desktop/OS/`) with a `
     about-me.md
     voice-dna.md
     working-style.md
+  active/
 ```
 
 ### Step 2: Generate Context Files
@@ -406,11 +408,15 @@ After all three are approved, write them to `~/Desktop/OS/context/`:
 
 > "**Now for the most important file in your workspace — CLAUDE.md.**
 >
-> This is your master instructions file. It's the very first thing I read every time you start a new conversation. It imports your context files (about-me, voice-dna, working-style) and contains your rules.
+> This is your master instructions file. It's the very first thing I read every time you start a new conversation. It imports your context files and contains your rules.
 >
 > Think of it like a briefing document. Before we talk about anything, I've already read: who you are, how you write, how you work, what tools you use, and what rules to follow. You never have to re-explain yourself.
 >
-> It also has something called a **self-correcting rules engine** — a section where I automatically record any mistakes I make or corrections you give me. So if you say 'don't do that', I write it down as a permanent rule. Over time, this workspace gets smarter the more you use it."
+> It also has two important built-in behaviours:
+>
+> 1. **Context-first philosophy** — before I do anything, I check your context files and connected tools for answers. I only ask you a question as a last resort, once I've exhausted everything I can look up myself. No lazy questions.
+>
+> 2. **Self-correcting rules engine** — every time you correct me, I write it down as a permanent rule. So if you say 'don't do that', it never happens again. Over time, this workspace gets smarter the more you use it."
 
 ### Step 5: Generate and Write CLAUDE.md
 
@@ -419,12 +425,31 @@ Create the master instruction file with the self-correcting rules engine:
 ```markdown
 # [Name]'s AI Workspace
 
+## Context — Second Brain
+
 @context/
+
+The context folder is the source of truth for who [Name] is, how they write, how they work, and what tools they use. It is loaded automatically above.
+
+**Before any task or question, check context first.** Don't work from assumptions — find the answer. If context/ doesn't have it, check connected tools (Gmail, Notion, Slack, Granola, calendar) before asking [Name]. Only come to [Name] with a question once you've exhausted all available sources.
+
+**Assumptions are the enemy.** Every decision and answer must be rooted in fact — from context files, from connected tools, or from the workspace itself. If you're unsure, look it up. If you can't find it anywhere, then ask.
+
+## Workspace Structure
+
+```
+OS/
+├── CLAUDE.md          ← this file (master instructions)
+├── context/           ← second brain (about-me, voice-dna, working-style)
+└── active/            ← all generated output (research, drafts, exports)
+```
+
+[Update this map as the workspace grows — add new folders and descriptions so future sessions can navigate without exploring.]
 
 ## Instructions
 
 ### Communication
-- Follow the Voice DNA guidelines above in all output
+- Follow the Voice DNA guidelines in all output
 - Match the output preferences in the working style guide
 - Use the writing samples as reference for tone and style
 
@@ -436,6 +461,7 @@ Create the master instruction file with the self-correcting rules engine:
 - Granola: meeting notes — check here for meeting context
 
 ### Rules
+- All generated output goes in `active/` — don't pollute root. Use structured subfolders within active/ (e.g., `active/research/`, `active/drafts/`, `active/exports/`). Create a subfolder when a new type of output emerges.
 [hard rules from Q10, formatted as clear instructions]
 
 ---
@@ -445,23 +471,21 @@ Create the master instruction file with the self-correcting rules engine:
 This section contains a growing ruleset that improves over time. **At session start, read all learned rules before doing anything.**
 
 ### How It Works
-1. When the user corrects you or you make a mistake, **immediately append a new rule** to the "Learned Rules" section below
-2. Rules are numbered sequentially and written as clear, imperative instructions
-3. Format: `N. [CATEGORY] Never/Always do X — because Y`
-4. Categories: `[STYLE]` `[TONE]` `[TOOL]` `[PREFERENCE]` `[PROCESS]` `[FORMAT]` `[COMMS]`
-5. Before starting any task, scan all rules below for relevant constraints
-6. If two rules conflict, the higher-numbered (newer) rule wins
-7. Keep rules current — when something changes, update in place rather than appending duplicates
-8. If a correction applies to a specific skill (morning-brief, inbox-triage, etc.), update that skill directly rather than adding a rule here
+1. When [Name] corrects you or you make a mistake, **immediately append a new rule** to the "Learned Rules" section below
+2. Rules are numbered sequentially: `N. [CATEGORY] Never/Always do X — because Y`
+3. Categories: `[STYLE]` `[TONE]` `[TOOL]` `[PREFERENCE]` `[PROCESS]` `[FORMAT]` `[COMMS]`
+4. Before starting any task, scan all rules for relevant constraints
+5. If two rules conflict, the higher-numbered (newer) rule wins
+6. Keep rules current — update in place rather than appending duplicates
 
 ### When to Add a Rule
-- User explicitly corrects your output ("no, do it this way")
-- User rejects a file, approach, or pattern
-- User states a preference ("always use X", "never do Y")
-- You discover something doesn't work as expected with their tools or workflow
+- [Name] explicitly corrects your output ("no, do it this way")
+- [Name] rejects a file, approach, or pattern
+- [Name] states a preference ("always use X", "never do Y")
+- You discover something doesn't work as expected with tools or workflows
 
 ### Learned Rules
-[Rules will be added here as the user works with the workspace]
+[Rules will be added here as [Name] works with the workspace]
 ```
 
 Show preview and get confirmation. Write CLAUDE.md to `~/Desktop/OS/CLAUDE.md`.
@@ -579,9 +603,13 @@ Load `skill-recommendation-map.md`. Based on Q3 (daily focus) and Q11/Q12 (tasks
 >
 > **Your OS folder** (on your Desktop — open this in Cowork from now on):
 > - `CLAUDE.md` — master instructions, the first thing I read every session
-> - `context/about-me.md` — who you are
-> - `context/voice-dna.md` — how you write (with real writing samples)
-> - `context/working-style.md` — your preferences, rules, and tool stack
+> - `context/` — your second brain (who you are, how you write, how you work)
+> - `active/` — where all generated output goes (keeps your workspace clean)
+>
+> **Built-in behaviours:**
+> - **Context-first** — I always check your context files and tools before asking you anything
+> - **Self-correcting** — every correction becomes a permanent rule, so mistakes don't repeat
+> - **Clean workspace** — all output goes in `active/` with organised subfolders
 >
 > **Skills** (saved globally in Cowork, available everywhere):
 > - Morning brief — say 'morning brief' for a daily summary

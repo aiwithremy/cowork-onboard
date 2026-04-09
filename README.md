@@ -1,12 +1,12 @@
 # Cowork Onboard
 
-10-minute guided onboarding for Claude Cowork. One command builds your entire AI workspace.
+Guided onboarding for Claude Cowork. One command builds your entire AI workspace.
 
 ## What It Does
 
-Run `/onboard` and in 10 minutes you'll have:
+Run `/onboard` and you'll have:
 
-- **Voice DNA** — Claude learns how you actually write by scanning your emails and messages, then builds a detailed voice profile with real writing samples
+- **Voice DNA** — Claude learns how you actually write by scanning your emails, Slack messages, docs, and any other writing samples you provide, then builds a detailed voice profile
 - **Context files** — who you are, how you work, your full tool stack and preferences
 - **A personalized morning brief** — daily summary of your calendar, email, and tasks
 - **Inbox triage** — automatic email categorization based on your priorities
@@ -16,8 +16,8 @@ Run `/onboard` and in 10 minutes you'll have:
 
 ## How It Works
 
-1. **Connect your tools** — step-by-step guidance to link Gmail, Google Drive, Calendar, Notion, Slack, Granola
-2. **Deep discovery scan** — digs through your sent emails, messages, and docs to learn your writing style and find existing business context
+1. **Connect your tools** — native connector cards show available integrations with one-click connect buttons. Claude explains why each tool matters and proactively suggests the most valuable ones
+2. **Discovery & validation** — scans all connected tools equally (email, Slack, docs, meeting notes) for writing style and business context. Asks for additional writing samples (newsletters, blog posts, social media). Then asks you to ruthlessly validate everything found — flagging anything outdated, wrong, or irrelevant
 3. **Guided interview** — 13 focused questions about you, your voice, your workflow, and your tools. Every question comes with rich examples so you're never staring at a blank prompt
 4. **Skill generation** — creates personalized morning-brief and inbox-triage skills tailored to your specific tools and priorities
 5. **Workspace setup** — generates CLAUDE.md with self-correcting rules engine, schedules automation

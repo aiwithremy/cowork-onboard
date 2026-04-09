@@ -1,6 +1,9 @@
 # MCP Setup Guide
 
-Reference document for guiding users through connecting their tools in Claude Cowork. Load the relevant section based on which tool the user selected.
+**This is a fallback guide.** The primary tool connection method is via native connector cards using `mcp__mcp-registry__suggest_connectors`, which renders interactive cards with connect buttons directly in chat. Only use this guide when:
+- The `suggest_connectors` tool is not available (non-Cowork environment)
+- A specific tool connection is failing and needs manual troubleshooting
+- The user asks for step-by-step instructions
 
 ## How to Use This Guide
 

@@ -74,10 +74,12 @@ Reference for the core interview in Phase 3. The main SKILL.md orchestrates when
 
 **Note**: This section generates Voice DNA, not "brand voice." Voice DNA is personal — how YOU write, regardless of whether you're a founder, employee, or freelancer.
 
+**Pre-fill from ALL sources**: The discovery scan pulls writing samples from every connected tool — email, Slack, docs, meeting notes, plus any additional samples the user provided (newsletters, blog posts, social media). Use ALL available samples when pre-filling these questions, not just email.
+
 ### Q5: Communication Style
 **Ask**: "How do you communicate? Think about your emails, Slack messages, and social posts."
 **Format**: Spectrum with examples
-**Present as**: "I've already pulled some of your actual writing from [emails/Slack/docs]. Based on what I see, here's where I'd place you:"
+**Present as**: "I've already pulled some of your actual writing from [list all sources scanned — e.g., emails, Slack messages, blog posts]. Based on what I see, here's where I'd place you:"
 
 Show real examples from the discovery scan, then present the spectrum:
 - **Very formal**: "Dear Mr. Smith, I hope this message finds you well. I am writing to enquire about..."
@@ -85,8 +87,8 @@ Show real examples from the discovery scan, then present the spectrum:
 - **Conversational**: "Hey! So here's the deal..."
 - **Very casual**: "yo so basically here's what I reckon..."
 
-**Pre-fill**: This should ALWAYS be pre-filled from the discovery scan. Pull 2-3 actual email excerpts or messages and show them:
-> "From your emails, your writing sounds like this:
+**Pre-fill**: This should ALWAYS be pre-filled from the discovery scan. Pull 2-3 actual excerpts from whatever sources were scanned (emails, Slack messages, blog posts, etc.) and show them:
+> "From your [emails/messages/writing], your writing sounds like this:
 >
 > *Example 1*: '[actual excerpt from their email]'
 > *Example 2*: '[actual excerpt from their email]'

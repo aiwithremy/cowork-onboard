@@ -25,7 +25,7 @@ The user is likely a complete beginner to Claude Cowork. Assume zero technical k
 ## Support Files
 
 All reference files are in the same directory as this skill file (`skills/onboard/`):
-- `mcp-setup-guide.md` — per-tool MCP connection instructions
+- `mcp-setup-guide.md` — fallback per-tool connection instructions (only used when native connector cards aren't available)
 - `interview-questions.md` — the full question bank for Phase 3 (with examples for every question)
 - `skill-templates.md` — parameterized templates for morning-brief and inbox-triage
 - `skill-recommendation-map.md` — role-to-skill recommendation mapping
@@ -45,7 +45,7 @@ Check if this workspace already has onboarding files:
 
 ### Welcome Message
 
-> "Hey! I'm going to walk you through setting up your AI workspace. This takes about 10 minutes, and by the end you'll have an AI assistant that genuinely knows your business, writes in your voice, and handles your recurring tasks.
+> "Hey! I'm going to walk you through setting up your AI workspace. By the end you'll have an AI assistant that genuinely knows your business, writes in your voice, and handles your recurring tasks.
 >
 > I'll explain everything as we go, so you'll actually understand what we're building and why — not just click through a setup wizard."
 
@@ -57,118 +57,118 @@ Check if this workspace already has onboarding files:
 >
 > Think of it this way: right now I'm a new hire on day one. Connecting tools is like giving me access to the company drives, email, and Slack. Without that, I'm working blind."
 
-### Tool Selection
+### Show Available Connectors
 
-Ask: **"Which of these do you use day-to-day? Pick all that apply."**
+Use the `mcp__mcp-registry__suggest_connectors` tool to display native connector cards in chat. These cards show icons, tool names, connection status, and connect/reconnect buttons — the user can connect tools directly from the cards.
 
-Present as a list:
-- Google Drive / Docs
-- Gmail
-- Google Calendar
-- Notion
-- Slack
-- Granola (meeting notes)
-- None of the above / I'll add tools later
+**Important:** Do NOT present a manual text list of tools. The connector cards handle this natively and are far better than a text list.
 
-### Tool Connection
+After showing the cards:
 
-For each tool they selected, load the relevant section from `mcp-setup-guide.md` and walk them through it:
+1. **Acknowledge what's already connected.** If any tools show as connected, call them out: "I can see you've already connected [X, Y, Z] — nice, that gives me a head start."
 
-1. Give them the steps one at a time
-2. Wait for them to confirm each step
-3. After they say it's connected, verify with a test operation:
-   - **Google Drive**: Try listing recent files
-   - **Gmail**: Try listing recent emails
-   - **Google Calendar**: Try listing today's events
+2. **Proactively encourage connecting more.** Look at what's NOT connected and pitch the most valuable ones with specific reasons:
+   - **Email (Gmail/Outlook):** "This is the single most valuable connection. I can learn exactly how you write from your sent emails, so I sound like you from day one."
+   - **Calendar:** "Lets me build your morning briefing and know what your day looks like without asking."
+   - **Docs (Google Drive/Notion):** "I can find your brand guidelines, SOPs, and business docs instead of making you describe them from memory."
+   - **Communication (Slack):** "Another rich source for your writing style, plus I can see what projects and teams you're active in."
+   - **Meeting notes (Granola):** "I can read your meeting transcripts to understand what you're working on and how you communicate."
+
+   Don't limit this to a fixed list — if the connector cards show other useful tools, encourage those too. The more connected, the better.
+
+3. **Ask if anything is missing:** "Any other tools you use daily that aren't shown here? We can always add more later."
+
+4. **Verify connections.** For each newly-connected tool, verify with a quick test operation:
+   - **Email**: Try listing recent emails
+   - **Calendar**: Try listing today's events
+   - **Drive**: Try listing recent files
    - **Notion**: Try searching for a recent page
    - **Slack**: Try listing channels
-   - **Granola**: Try listing recent meetings
-4. Confirm success: "Connected! I can see your [files/emails/events]. Moving on."
-5. If it fails: Try one troubleshooting step. If still failing: "No worries — we can connect this later. Let's keep going."
+   - If a test fails: try one troubleshooting step. If still failing: "No worries — we can connect this later. Let's keep going."
 
-If they chose "None / I'll add later", that's fine. Say: "No problem! The onboarding will still work — I'll just ask you more questions instead of pulling from your existing stuff. You can connect tools anytime later."
+### Fallback (non-Cowork environments)
+
+If the `mcp__mcp-registry__suggest_connectors` tool is not available, fall back to the manual approach:
+
+1. Ask: "What tools do you use day-to-day? Think about email, calendar, notes, docs, communication, and meeting tools."
+2. For each tool they mention, load the relevant section from `mcp-setup-guide.md` and walk them through connection step by step.
+3. Follow the same verification tests above.
 
 ### Transition
 
-> "Great, tools are connected. Now let me put them to work. I'm going to dig through your emails, docs, and messages to learn how you write and what your business is about. This saves you from having to explain everything from scratch."
+> "Great, tools are connected. Now let me put them to work. I'm going to dig through your emails, messages, and docs to learn how you write and what your business is about. This saves you from having to explain everything from scratch."
 
 ---
 
-## Phase 2: Deep Discovery Scan
+## Phase 2: Discovery & Validation
 
 ### Teach: What's Happening and Why
 
 > "**Here's what I'm doing right now:**
 >
-> I'm reading through your recent sent emails to learn your writing style — how you greet people, how formal or casual you are, what phrases you use. I'm also searching your Drive and Notion for any brand guides, SOPs, or business docs that already describe who you are and how you work.
+> I'm reading through your recent messages and emails to learn your writing style — how you greet people, how formal or casual you are, what phrases you use. I'm also searching your docs for any brand guides, SOPs, or business docs that already describe who you are and how you work.
 >
 > **Why this matters:** In a few minutes, I'm going to create a 'Voice DNA' file — a detailed profile of how you write, so that every time you use this workspace, I sound like you, not like a generic AI. The more real examples I can pull now, the more accurate that voice profile will be."
 
-### What to Search For
+### Beat 1: Scan All Connected Sources
 
-#### Gmail — Writing Tone & Style (PRIORITY)
-This is the most valuable source for Voice DNA. Search for:
-- **Sent emails** (last 30-60 days) — these reveal how the user actually writes
-- Focus on emails TO clients, partners, and colleagues (not automated replies)
-- Pull 5-10 representative email excerpts that show their natural writing style
-- Note patterns: greeting style, sign-off style, sentence length, formality level, use of humor, punctuation habits
-- Look for: do they use exclamation marks? Emojis? Short sentences or long? Formal or casual greetings?
+Scan every connected tool for writing samples and business context. **Don't privilege any single source** — pull equally from everything available.
 
-#### Gmail — Business Context
+#### Communication Tools (Writing Style)
+For each connected communication tool (email, Slack, etc.):
+- Pull recent messages/emails **sent by the user** (last 30-60 days)
+- Focus on messages to real people (not automated replies or notifications)
+- Collect 3-5 representative writing samples from EACH source
+- Note patterns: greeting style, sign-off style, sentence length, formality level, humor, punctuation habits, emoji usage
+
+#### Document Tools (Business Context)
+For each connected doc tool (Drive, Notion, etc.):
+- Search for brand guidelines, style guides, tone-of-voice documents
+- Search for about pages, bios, company descriptions
+- Search for SOPs, process docs, team guidelines
+- Search for client proposals (communication style)
+- Search for any document with "brand", "style", "guide", "about", "SOP", "process", "bio", "tone"
+
+#### Meeting Notes
+For connected meeting note tools (Granola, etc.):
+- Pull recent meeting transcripts for verbal communication style
+- Pull meeting summaries for context on current work
+
+#### Other Context
 - Email signatures → name, role, company, links
 - Recent threads → what they're working on, who they work with
 - Newsletter subscriptions → interests and industry
+- Channel names (Slack) → teams and projects
 
-#### Google Drive / Docs
-- Brand guidelines, style guides, tone-of-voice documents
-- About pages, bios, company descriptions
-- SOPs, process docs, team guidelines
-- Client proposals (for understanding their communication style)
-- Any document with "brand", "style", "guide", "about", "SOP", "process", "bio", "tone"
+### Beat 2: Ask for Additional Writing Sources
 
-#### Notion
-- Company wiki pages, about pages
-- Process docs, SOPs, runbooks
-- Meeting notes, project docs
-- Brand or style guidelines
+After the automated scan, explicitly ask:
 
-#### Slack
-- Recent messages FROM the user (not to them) — for writing style analysis
-- Channel names → what teams/projects they're involved in
-- Pinned messages → important context
+> "I've pulled writing samples from your connected tools. But some of your best writing might live elsewhere.
+>
+> **Where else does your writing show up?** For example:
+> - Newsletters you write (Substack, Beehiiv, Mailchimp)
+> - Blog posts on your website
+> - Social media posts (LinkedIn, X, Instagram captions)
+> - YouTube scripts or descriptions
+> - Community posts (Reddit, forums, Discord)
+>
+> If you have examples, just copy-paste some samples here. The more I have, the more I'll sound like you."
 
-#### Granola / Meeting Notes
-- Recent meeting transcripts — for communication style in verbal contexts
-- Meeting summaries — what they're working on
+Wait for their response. If they provide text, add it to the writing samples collection. If they say "no" or "that's it", move on.
 
-### How to Analyze Writing Style
-
-From the emails and messages you find, build a profile:
-
-1. **Collect 5-10 writing samples** — real excerpts from their sent emails, Slack messages, or docs
-2. **Identify patterns**:
-   - Average sentence length (short and punchy? Long and detailed?)
-   - Greeting style ("Hi John," vs "Hey!" vs "John,")
-   - Sign-off style ("Best," vs "Cheers," vs "Thanks!" vs nothing)
-   - Punctuation habits (exclamation marks? Ellipses? Em-dashes?)
-   - Emoji usage (never? Sometimes? Frequently?)
-   - Formality spectrum (formal, professional, conversational, casual)
-   - Unique phrases or expressions they repeat
-   - How they give instructions (direct? Softened? Collaborative?)
-3. **Save these samples** — they'll be embedded directly into the Voice DNA file
-
-### Present Findings
+### Beat 3: Present Findings
 
 Show what you found — be specific and use their actual writing:
 
-> "I dug through your emails and docs. Here's what I learned about how you write:
+> "Here's what I found across your [list sources scanned]:
 >
-> **Your writing style**: You're [conversational/professional/etc.]. Your emails tend to be [short and direct / detailed and thorough / warm and personal].
+> **Your writing style**: You're [conversational/professional/etc.]. Your messages tend to be [short and direct / detailed and thorough / warm and personal].
 >
 > **Examples of your actual writing:**
-> 1. '[actual excerpt from their sent email]'
-> 2. '[actual excerpt from their sent email]'
-> 3. '[actual excerpt from their Slack message]'
+> 1. *[Source]*: '[actual excerpt]'
+> 2. *[Source]*: '[actual excerpt]'
+> 3. *[Source]*: '[actual excerpt]'
 >
 > **Patterns I noticed:**
 > - You [always/never/usually] [pattern]
@@ -176,16 +176,35 @@ Show what you found — be specific and use their actual writing:
 > - Your greetings are usually [style]
 >
 > **Other context I found:**
-> - [Brand guide / bio / SOP from Drive or Notion]
-> - [Business context from email signatures]
->
-> Does this feel accurate? Anything I got wrong?"
+> - [Brand guide / bio / SOP from docs]
+> - [Business context from email signatures]"
 
 If nothing found (no tools connected or no useful content):
-> "I couldn't find existing docs or emails to learn from — no worries, we'll figure out your style through the interview. It'll just mean a few more questions."
+> "I couldn't find existing docs or messages to learn from — no worries, we'll figure out your style through the interview. It'll just mean a few more questions."
 
-### Hold All Scan Results
-Keep everything — writing samples, patterns, documents — in context. These feed directly into Phase 3 pre-fills and Phase 4 file generation.
+### Context Validation Gate
+
+<HARD-GATE>
+Do NOT proceed to Phase 3 until the user has explicitly validated the discovered context. This is not optional.
+</HARD-GATE>
+
+After presenting findings, deliver the validation prompt:
+
+> "Before we move on — I need you to be ruthless here.
+>
+> **Please double-check everything I've found above. Tell me explicitly if anything is:**
+> - **Outdated** — old role, old company, old guidelines that no longer apply
+> - **Wrong** — I misread something or it doesn't represent you accurately
+> - **Not relevant** — stale docs, archived projects, one-off writing that isn't your normal style
+>
+> I'd rather you over-correct now than have me treat old docs as facts. If that brand guide from 2022 doesn't reflect how you work today, tell me. If that email was a one-off tone, flag it.
+>
+> **What should I drop or correct?**"
+
+Wait for their response. If they flag items, remove or correct them. If they say "looks good", confirm: "Great — I'll treat everything above as current and accurate."
+
+### Hold All Validated Results
+Keep everything that survived validation — writing samples, patterns, documents — in context. These feed directly into Phase 3 pre-fills and Phase 4 file generation.
 
 ---
 
@@ -200,7 +219,9 @@ Keep everything — writing samples, patterns, documents — in context. These f
 > 2. **Voice DNA** — so I write like you, not like a robot
 > 3. **Working Style** — so I know your preferences, rules, daily tasks, and tools
 >
-> **Why files, not just memory?** These files load automatically every time you open this workspace. You can read them, edit them, and they're always up to date. It's like an employee handbook, but for your AI."
+> **Why files, not just memory?** These files load automatically every time you open this workspace. You can read them, edit them, and they're always up to date. It's like an employee handbook, but for your AI.
+>
+> Quick tip — you can click the microphone button in the chat bar to answer any of these by voice. Sometimes it's easier to just talk than type."
 
 Load `interview-questions.md` for the full question bank, including all examples. Follow these rules:
 
@@ -224,7 +245,7 @@ Ask Q1 through Q4 from `interview-questions.md`, one at a time. Each question ha
 Transition — teach what Voice DNA is:
 > "**Now for the fun part — your Voice DNA.**
 >
-> This is a profile of how you actually write. Not a brand guide — your personal writing fingerprint. I already have a head start from your emails. The next few questions will sharpen it.
+> This is a profile of how you actually write. Not a brand guide — your personal writing fingerprint. I already have a head start from your [emails/messages/docs]. The next few questions will sharpen it.
 >
 > **Why this matters:** Without Voice DNA, every AI workspace sounds the same — polished, generic, corporate. With it, when I draft an email or write a social post for you, it sounds like *you* wrote it. People who get that email won't be able to tell the difference."
 
@@ -285,7 +306,7 @@ Create a folder called `OS` on the user's **Desktop** (`~/Desktop/OS/`) with `co
 
 ### Step 2: Generate Context Files
 
-Using the interview answers AND the deep discovery scan data, generate three files. **Show each file to the user before writing it.**
+Using the interview answers AND the validated discovery scan data, generate three files. **Show each file to the user before writing it.**
 
 #### context/about-me.md
 Generate from Q1-Q4. Structure:
@@ -308,7 +329,7 @@ Generate from Q1-Q4. Structure:
 ```
 
 #### context/voice-dna.md
-Generate from Q5-Q8 + the deep discovery scan writing samples. This is the most important file — it should be rich and specific, not a few light sentences.
+Generate from Q5-Q8 + the validated discovery scan writing samples from ALL sources. This is the most important file — it should be rich and specific, not a few light sentences.
 
 **Start with the base writing rules** from `voice-dna-base.md`, then layer the user's personal style on top.
 
@@ -344,6 +365,9 @@ These are real examples of how I write. Use these as a reference for tone, style
 ### Message Examples
 [1-3 Slack/chat message examples if available]
 
+### Other Writing
+[any additional samples from newsletters, blog posts, social media, etc. that the user provided]
+
 ## Writing Patterns
 Observed patterns from my actual writing:
 - Greeting style: [e.g., "Hey [name]," / "Hi [name]," / "[name],"]
@@ -354,7 +378,7 @@ Observed patterns from my actual writing:
 - Instruction style: [e.g., "Direct and clear" / "Collaborative — 'what do you think?'"]
 ```
 
-**This file should be comprehensive.** Include every writing sample you found. Include every pattern. The more examples, the better Claude can match the user's voice in future sessions.
+**This file should be comprehensive.** Include every validated writing sample. Include every pattern. The more examples, the better Claude can match the user's voice in future sessions.
 
 #### context/working-style.md
 Generate from Q9-Q13. Structure:
@@ -655,3 +679,4 @@ Throughout the entire onboarding:
 - **User wants to stop mid-flow**: Save progress so far. Tell them they can resume with `/onboard` or refine with `/update-context`.
 - **Scheduling fails**: Provide manual instructions as fallback
 - **User seems confused**: Pause and re-explain the current concept. Ask "Does that make sense?" before continuing.
+- **suggest_connectors unavailable**: Fall back to manual tool selection using `mcp-setup-guide.md`

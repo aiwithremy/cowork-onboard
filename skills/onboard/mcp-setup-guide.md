@@ -1,134 +1,86 @@
-# MCP Setup Guide
+# Connecting Tools — Fallback Guide
 
-**This is a fallback guide.** The primary tool connection method is via native connector cards using `mcp__mcp-registry__suggest_connectors`, which renders interactive cards with connect buttons directly in chat. Only use this guide when:
-- The `suggest_connectors` tool is not available (non-Cowork environment)
-- A specific tool connection is failing and needs manual troubleshooting
-- The user asks for step-by-step instructions
+**This is the fallback.** The primary path is Cowork's own connector cards (`mcp__mcp-registry__suggest_connectors`), which render in the chat with a Connect button the user clicks. Use this guide only when:
 
-## How to Use This Guide
+- the connector cards don't render (a quiet `list_connectors` came back empty, or the tool isn't available — you're not in Cowork), or
+- one specific tool is failing and needs troubleshooting, or
+- the user asks for step-by-step directions.
 
-For each tool the user wants to connect:
-1. Read the relevant section below
-2. Walk them through step-by-step
-3. After they say it's connected, verify with the test operation
-4. If the test fails, troubleshoot briefly. If it still fails, note it and move on
-
-Keep instructions conversational, not robotic. One step at a time, wait for confirmation before the next.
+<HARD-GATE>
+Never claim a screen, panel, or dialog has opened, or that something "should now appear". You cannot see the user's screen and you cannot open windows for them. Describe where to look, then ask what they see. Do not use `claude://` links to open settings — they do nothing on current builds.
+</HARD-GATE>
 
 ---
 
-## Google Drive / Docs
+## The click path (Claude desktop app)
 
-### Connection Steps
-1. In Cowork, click the **tools icon** (wrench/plug icon) in the bottom-left area
-2. Look for **Google Drive** in the available integrations
-3. Click **Connect** — a browser window will open
-4. Sign in to your Google account and grant access
-5. Return to Cowork — you should see Google Drive listed as connected
+The same numbered path works for every connector, so teach it once:
 
-### Verification Test
-Search for a recent document:
-- Try listing recent files from Google Drive
-- If you can see file names, the connection works
+1. **Customize** — top left of the window
+2. **Scroll to the bottom** — connections live at the bottom of that panel
+3. **Browse connectors** — top right of the connectors area
+4. Find the tool, click **Connect**, and sign in when the browser opens
+5. Come back to the chat and tell me it's done
 
-### Common Issues
-- **"Access denied"**: The user may need to use a personal Google account rather than a managed workspace account with restricted permissions
-- **Browser didn't open**: Try clicking Connect again. If it still doesn't work, check that the default browser is set correctly
-- **Wrong account**: Click Disconnect, then Connect again and choose the right Google account
+If they can't find it, don't guess through five variations. Ask:
+
+> "What do you see in the top-left of the window? Tell me the labels and I'll point you at the right one."
+
+Wait for their answer and work from what's actually on screen. Build labels change; the user's eyes don't.
 
 ---
 
-## Gmail
+## Before any tool gets read: confirm the account
 
-### Connection Steps
-1. In Cowork, click the **tools icon** in the bottom-left area
-2. Look for **Gmail** in the available integrations
-3. Click **Connect** — a browser window will open
-4. Sign in and grant Gmail access (read and send permissions)
-5. Return to Cowork — Gmail should show as connected
+Whichever route they connect through, the account matters. When a tool is connected, read back the account identity the tool reports (an email address, a workspace name) and confirm it's the right one:
 
-### Verification Test
-Try listing recent emails:
-- Search for recent inbox messages
-- If you can see subject lines, the connection works
+> "That's connected as `sam@acme.com` — is that the account you want me working from?"
 
-### Common Issues
-- **"This app isn't verified"**: Click "Advanced" → "Go to [app name]" to proceed
-- **Only want read access**: Note that some operations require send access. You can always decline individual actions later
-- **Multiple email accounts**: Connect your primary business email first. You can add more later
+If they have several accounts, ask which one before reading anything. This is the same consent gate as Phase 2 of the skill: connection is not permission.
 
 ---
 
-## Google Calendar
+## Per-tool notes
 
-### Connection Steps
-1. In Cowork, click the **tools icon**
-2. Look for **Google Calendar** in the available integrations
-3. Click **Connect** — may share the same auth as Google Drive if already connected
-4. Grant calendar access
-5. Return to Cowork — Calendar should show as connected
+### Email (Gmail, Outlook)
 
-### Verification Test
-Try listing upcoming events:
-- Check today's or this week's calendar events
-- If you can see event titles and times, the connection works
+- **Verification read:** list the few most recent messages. Subject lines coming back = connected.
+- **"This app isn't verified"** during Google sign-in → **Advanced** → continue.
+- **Wrong account connected** → disconnect, connect again, and choose the right account on the sign-in screen.
+- **Work account with restrictions** → an IT admin may have to approve it. Not worth fighting during setup: mark it skipped and move on.
 
-### Common Issues
-- **No events showing**: Check that the calendar you use is the primary calendar on the connected account
-- **Shared calendars**: Shared/team calendars may not appear. Focus on the primary calendar for now
+### Calendar (Google Calendar, Outlook)
 
----
+- **Verification read:** list today's or this week's events. Event titles coming back = connected.
+- Often shares its sign-in with the same Google account as email or Drive.
+- **No events showing** → check the calendar they actually use belongs to the connected account, not a shared one.
 
-## Notion
+### Files and documents (Google Drive, Dropbox)
 
-### Connection Steps
-1. In Cowork, click the **tools icon**
-2. Look for **Notion** in the available integrations
-3. Click **Connect** — a Notion authorization page will open
-4. Select which Notion workspace to connect
-5. Choose which pages/databases to grant access to (you can select all or specific ones)
-6. Click **Allow access**
-7. Return to Cowork — Notion should show as connected
+- **Verification read:** list a few recent file names. File names coming back = connected.
+- **"Access denied"** → usually a managed work account with restricted sharing. Try a personal account, or skip it.
 
-### Verification Test
-Try searching for a recent page:
-- Search Notion for a page you know exists
-- If you can see page titles, the connection works
+### Notion
 
-### Common Issues
-- **"No workspaces available"**: Make sure you're logged into the right Notion account in your browser
-- **Can't see certain pages**: During authorization, you need to explicitly select which pages to share. Reconnect and select more pages if needed
-- **Slow response**: Notion API can be slow with large workspaces. This is normal
+- **Verification read:** search for any recent page. Page titles coming back = connected.
+- During authorization Notion asks **which pages to share** — anything not selected stays invisible. If a search finds nothing they expected, that's usually why: reconnect and grant more pages.
+- Large workspaces respond slowly. That's normal, not a failure.
 
----
+### Slack
 
-## Slack
+- **Verification read:** list channels. Channel names coming back = connected.
+- **"You don't have permission"** → a workspace admin has to approve the integration. Skip it rather than blocking setup.
+- Direct messages are often out of scope — public channels only. Say so rather than looking for DMs that aren't there.
 
-### Connection Steps
-1. In Cowork, click the **tools icon**
-2. Look for **Slack** in the available integrations
-3. Click **Connect** — Slack authorization will open
-4. Select your Slack workspace
-5. Review and approve the permissions
-6. Return to Cowork — Slack should show as connected
+### Meeting notes (Granola and similar)
 
-### Verification Test
-Try listing recent channels:
-- Search for a channel you know exists
-- If you can see channel names, the connection works
+- **Verification read:** list recent meeting notes or transcripts. Titles coming back = connected.
+- If it isn't offered as a connector, note it for the tool map in Q13 and move on.
 
-### Common Issues
-- **"You don't have permission"**: You may need workspace admin approval. Ask your Slack admin to approve the integration
-- **Wrong workspace**: Disconnect and reconnect, making sure to select the correct workspace
-- **Can't see DMs**: The integration may only have access to public channels by default
+### Anything else
 
----
+1. Check whether it appears in the connectors list at all.
+2. If it does, use the same path: find it, Connect, sign in, then verify with one small read.
+3. If it doesn't: "That one isn't available as a connection yet — I'll note it in your tool map so I know you use it."
 
-## Other Tools
-
-If the user mentions a tool not covered above:
-1. Check if it's available in Cowork's integrations panel
-2. If yes, guide them through the generic flow: tools icon → find the integration → Connect → authorize → verify
-3. If not available, note it for later: "That tool isn't available as a direct integration yet, but we can work with it in other ways later."
-
-Don't let a missing tool block the onboarding flow.
+Never let a missing or stubborn tool stall the setup. One retry, then skip it and carry on.

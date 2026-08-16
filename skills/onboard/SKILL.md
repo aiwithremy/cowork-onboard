@@ -1,301 +1,589 @@
 ---
 name: onboard
-description: Use when setting up a new AI workspace, running guided onboarding, or bootstrapping context files for Claude Cowork
+description: Use when setting up an AI workspace in Claude Cowork, running guided onboarding, or building context files (CLAUDE.md, about-me, voice-dna, working-style) for a connected folder
 user-invocable: true
 ---
 
 # Cowork Onboard
 
-Guided onboarding that builds a personalized AI workspace. This is both a setup tool AND an educational walkthrough. The user should finish understanding what they built and why each piece matters.
+Guided onboarding that turns a connected folder into a personal AI workspace: the folder structure, three context files, and a master instructions file. This is both a setup tool AND a short lesson — the user should finish understanding what they built and why each piece matters.
+
+## What this skill does and does NOT do
+
+**It does:** confirm which folder is connected, help the user connect their tools, verify those connections with real reads, learn from sources they explicitly approve, run a short interview one question at a time, preview every file, then create and verify the workspace.
+
+**It does NOT:** create, save, or recommend skills. Set up scheduled or recurring runs. Send, post, reply to, or change anything in a connected tool. Write anywhere outside the folder the user has connected.
+
+If the user asks for any of those, say plainly that this setup doesn't do it, finish the setup, and let them decide separately afterwards.
 
 <HARD-GATE>
-This is a GUIDED flow. Ask ONE question at a time. Wait for the user's response before proceeding. Never batch questions. Never skip steps. Never generate files without showing a preview first.
-
-Every question MUST include rich examples. Most users can't articulate what they want from scratch. Give them concrete examples to react to and riff on. Examples are not optional.
-
-EDUCATIONAL REQUIREMENT: Before each major phase, explain WHAT you're about to do, WHY it matters, and HOW it will help them. The user should never feel like they're clicking through a wizard they don't understand. They should leave this onboarding genuinely understanding how their AI workspace works.
+1. **One question at a time.** Wait for the user's answer before asking the next. Never batch questions. Never skip steps.
+2. **Read-only on their tools, and only what they approved.** You may only READ, never send, reply, post, delete, move, or modify anything. Two levels of approval: the one-item connection check in Step 1.3, which you ask for in the moment, and the full source approval in Phase 2, which covers everything after that.
+3. **Never claim something happened that you did not verify.** No "I've opened that screen for you", no "your folder is created", no "you're connected" without a real result in front of you: a successful read, or a directory listing showing the path.
+4. **Never write outside the confirmed workspace folder**, and never assume a path. There is no default location — not a folder on the Desktop, not one in Documents, not one named `OS`. A folder only becomes the workspace when the user has connected it and confirmed it out loud.
+5. **Preview before writing.** Show every file's full content and get an explicit yes before it is written.
+6. **Examples with every question.** Most users can't articulate what they want from scratch. Give concrete examples to react to.
 </HARD-GATE>
 
 ## Audience
 
-The user is likely a complete beginner to Claude Cowork. Assume zero technical knowledge. Keep language simple, warm, and encouraging. Never use jargon without explaining it.
+The user is likely brand new to Claude Cowork and not technical. Assume zero technical knowledge. Warm, plain English, no jargon without a one-line translation. Every step should leave them understanding something they didn't understand before.
 
-**This is a learning experience, not just a setup wizard.** Every step should leave the user understanding a concept they didn't understand before. By the end, they should be able to explain to someone else what their workspace does and why each file exists.
+## Support files
 
-## Support Files
+All reference files sit in the same folder as this SKILL.md (`skills/onboard/`):
 
-All reference files are in the same directory as this skill file (`skills/onboard/`):
-- `mcp-setup-guide.md` — fallback per-tool connection instructions (only used when native connector cards aren't available)
-- `interview-questions.md` — the full question bank for Phase 3 (with examples for every question)
-- `skill-templates.md` — parameterized templates for morning-brief and inbox-triage
-- `skill-recommendation-map.md` — role-to-skill recommendation mapping
-- `voice-dna-base.md` — base writing rules embedded in every voice-dna file
+- `interview-questions.md` — the full question bank for Phase 5, with examples for every question
+- `mcp-setup-guide.md` — fallback connection directions, used only when Cowork's connector cards aren't available
+- `voice-dna-base.md` — base writing rules embedded in every generated `voice-dna.md`
 
-When this skill says "load [filename]", read it from the same directory as this SKILL.md.
-
-## Before You Start
-
-Check if this workspace already has onboarding files:
-- If `CLAUDE.md` exists AND `context/` folder exists → warn the user: "This workspace already has context files. Running onboarding will overwrite them. Want to continue, or would `/update-context` be better for updating specific sections?"
-- If no existing files → proceed directly
+When this skill says "load [filename]", read it from that folder.
 
 ---
 
-## Phase 1: Welcome & Tool Connection
+## Phase 0: Welcome, workspace folder, resume check
 
-### Welcome Message
+### Step 0.1 — Welcome and set honest expectations
 
-> "Hey! I'm going to walk you through setting up your AI workspace. By the end you'll have an AI assistant that genuinely knows your business, writes in your voice, and handles your recurring tasks.
+> "Hey! I'm going to help you set up your AI workspace — a folder on your computer that holds everything I need to know about you, so every future conversation starts with me already understanding your business, how you write, and how you like to work.
 >
-> I'll explain everything as we go, so you'll actually understand what we're building and why — not just click through a setup wizard."
-
-### Teach: Why Tools Come First
-
-> "**First things first — let's connect your tools.**
+> **Time:** about 20–30 minutes. Most of it is me asking you questions, so it moves at your pace.
 >
-> Here's why this is step one: the more tools I have access to, the less you have to explain to me. If I can read your emails, I can learn how you actually write. If I can see your calendar, I can build you a morning briefing. If I can search your docs, I can find your brand guidelines instead of making you describe them from memory.
+> **You can stop anytime.** I save our progress as we go, so if you close this or run out of time, we pick up where we left off.
 >
-> Think of it this way: right now I'm a new hire on day one. Connecting tools is like giving me access to the company drives, email, and Slack. Without that, I'm working blind."
-
-### Show Available Connectors
-
-Use the `mcp__mcp-registry__suggest_connectors` tool to display native connector cards in chat. These cards show icons, tool names, connection status, and connect/reconnect buttons — the user can connect tools directly from the cards.
-
-**Important:** Do NOT present a manual text list of tools. The connector cards handle this natively and are far better than a text list.
-
-After showing the cards:
-
-1. **Acknowledge what's already connected.** If any tools show as connected, call them out: "I can see you've already connected [X, Y, Z] — nice, that gives me a head start."
-
-2. **Proactively encourage connecting more.** Look at what's NOT connected and pitch the most valuable ones with specific reasons:
-   - **Email (Gmail/Outlook):** "This is the single most valuable connection. I can learn exactly how you write from your sent emails, so I sound like you from day one."
-   - **Calendar:** "Lets me build your morning briefing and know what your day looks like without asking."
-   - **Docs (Google Drive/Notion):** "I can find your brand guidelines, SOPs, and business docs instead of making you describe them from memory."
-   - **Communication (Slack):** "Another rich source for your writing style, plus I can see what projects and teams you're active in."
-   - **Meeting notes (Granola):** "I can read your meeting transcripts to understand what you're working on and how you communicate."
-
-   Don't limit this to a fixed list — if the connector cards show other useful tools, encourage those too. The more connected, the better.
-
-3. **Ask if anything is missing:** "Any other tools you use daily that aren't shown here? We can always add more later."
-
-4. **Verify connections.** For each newly-connected tool, verify with a quick test operation:
-   - **Email**: Try listing recent emails
-   - **Calendar**: Try listing today's events
-   - **Drive**: Try listing recent files
-   - **Notion**: Try searching for a recent page
-   - **Slack**: Try listing channels
-   - If a test fails: try one troubleshooting step. If still failing: "No worries — we can connect this later. Let's keep going."
-
-### Fallback (non-Cowork environments)
-
-If the `mcp__mcp-registry__suggest_connectors` tool is not available, fall back to the manual approach:
-
-1. Ask: "What tools do you use day-to-day? Think about email, calendar, notes, docs, communication, and meeting tools."
-2. For each tool they mention, load the relevant section from `mcp-setup-guide.md` and walk them through connection step by step.
-3. Follow the same verification tests above.
-
-### Transition
-
-> "Great, tools are connected. Now let me put them to work. I'm going to dig through your emails, messages, and docs to learn how you write and what your business is about. This saves you from having to explain everything from scratch."
-
----
-
-## Phase 2: Discovery & Validation
-
-### Teach: What's Happening and Why
-
-> "**Here's what I'm doing right now:**
+> **What I'll do:** help you connect your tools, learn what I can from the ones you approve, ask you some questions, then build the folder and show you everything before I save it.
 >
-> I'm reading through your recent messages and emails to learn your writing style — how you greet people, how formal or casual you are, what phrases you use. I'm also searching your docs for any brand guides, SOPs, or business docs that already describe who you are and how you work.
->
-> **Why this matters:** In a few minutes, I'm going to create a 'Voice DNA' file — a detailed profile of how you write, so that every time you use this workspace, I sound like you, not like a generic AI. The more real examples I can pull now, the more accurate that voice profile will be."
+> **What I won't do:** touch anything in your email or accounts — I'm read-only the whole way through. And I won't set anything running on a schedule."
 
-### Beat 1: Scan All Connected Sources
+### Step 0.2 — Identify the connected folder (never guess)
 
-Scan every connected tool for writing samples and business context. **Don't privilege any single source** — pull equally from everything available.
+The workspace has to live in a folder Cowork can actually write to — one the user has connected to this conversation.
 
-#### Communication Tools (Writing Style)
-For each connected communication tool (email, Slack, etc.):
-- Pull recent messages/emails **sent by the user** (last 30-60 days)
-- Focus on messages to real people (not automated replies or notifications)
-- Collect 3-5 representative writing samples from EACH source
-- Note patterns: greeting style, sign-off style, sentence length, formality level, humor, punctuation habits, emoji usage
-
-#### Document Tools (Business Context)
-For each connected doc tool (Drive, Notion, etc.):
-- Search for brand guidelines, style guides, tone-of-voice documents
-- Search for about pages, bios, company descriptions
-- Search for SOPs, process docs, team guidelines
-- Search for client proposals (communication style)
-- Search for any document with "brand", "style", "guide", "about", "SOP", "process", "bio", "tone"
-
-#### Meeting Notes
-For connected meeting note tools (Granola, etc.):
-- Pull recent meeting transcripts for verbal communication style
-- Pull meeting summaries for context on current work
-
-#### Other Context
-- Email signatures → name, role, company, links
-- Recent threads → what they're working on, who they work with
-- Newsletter subscriptions → interests and industry
-- Channel names (Slack) → teams and projects
-
-### Beat 2: Ask for Additional Writing Sources
-
-After the automated scan, explicitly ask:
-
-> "I've pulled writing samples from your connected tools. But some of your best writing might live elsewhere.
->
-> **Where else does your writing show up?** For example:
-> - Newsletters you write (Substack, Beehiiv, Mailchimp)
-> - Blog posts on your website
-> - Social media posts (LinkedIn, X, Instagram captions)
-> - YouTube scripts or descriptions
-> - Community posts (Reddit, forums, Discord)
->
-> If you have examples, just copy-paste some samples here. The more I have, the more I'll sound like you."
-
-Wait for their response. If they provide text, add it to the writing samples collection. If they say "no" or "that's it", move on.
-
-### Beat 3: Present Findings
-
-Show what you found — be specific and use their actual writing:
-
-> "Here's what I found across your [list sources scanned]:
->
-> **Your writing style**: You're [conversational/professional/etc.]. Your messages tend to be [short and direct / detailed and thorough / warm and personal].
->
-> **Examples of your actual writing:**
-> 1. *[Source]*: '[actual excerpt]'
-> 2. *[Source]*: '[actual excerpt]'
-> 3. *[Source]*: '[actual excerpt]'
->
-> **Patterns I noticed:**
-> - You [always/never/usually] [pattern]
-> - You tend to [pattern]
-> - Your greetings are usually [style]
->
-> **Other context I found:**
-> - [Brand guide / bio / SOP from docs]
-> - [Business context from email signatures]"
-
-If nothing found (no tools connected or no useful content):
-> "I couldn't find existing docs or messages to learn from — no worries, we'll figure out your style through the interview. It'll just mean a few more questions."
-
-### Context Validation Gate
+1. **Look first.** Use your file tools to list the folder(s) available in this conversation. Note the exact path as the app reports it.
+2. **Confirm it in plain language**, showing the path exactly as you saw it — never reformatted, never converted between Mac and Windows styles:
+   > "It looks like the folder connected here is `[exact path]`. Is that the folder you want to use as your AI workspace?"
+3. **If no folder is connected** (you cannot list or write anywhere), stop and explain:
+   > "Before we build anything, I need access to a folder on your computer — that's where your workspace files will live. In Cowork, connect a folder to this conversation (a new empty folder is perfect — you can call it anything), then tell me when it's done and I'll pick it up from here."
+   Wait. Do not proceed, and do not invent a path.
 
 <HARD-GATE>
-Do NOT proceed to Phase 3 until the user has explicitly validated the discovered context. This is not optional.
+Never assume a location. Do not create anything in a Desktop folder, a Documents folder, or any other path just because it's the conventional choice. The workspace root is ONLY ever a folder the user has connected and confirmed in this conversation.
 </HARD-GATE>
 
-After presenting findings, deliver the validation prompt:
+### Step 0.3 — Decide: this folder, or a subfolder inside it?
 
-> "Before we move on — I need you to be ruthless here.
->
-> **Please double-check everything I've found above. Tell me explicitly if anything is:**
-> - **Outdated** — old role, old company, old guidelines that no longer apply
-> - **Wrong** — I misread something or it doesn't represent you accurately
-> - **Not relevant** — stale docs, archived projects, one-off writing that isn't your normal style
->
-> I'd rather you over-correct now than have me treat old docs as facts. If that brand guide from 2022 doesn't reflect how you work today, tell me. If that email was a one-off tone, flag it.
->
-> **What should I drop or correct?**"
+Look at what's already in the confirmed folder, then propose one of two options and let the user choose:
 
-Wait for their response. If they flag items, remove or correct them. If they say "looks good", confirm: "Great — I'll treat everything above as current and accurate."
+- **Empty, or clearly meant for this** → use the folder itself as the workspace root.
+  > "This folder's empty, so I'll build your workspace right here in `[path]`. Good with you?"
+- **A broad folder with unrelated things in it** (a Desktop, Documents, Downloads, or home folder, or a folder full of existing projects) → propose a subfolder so nothing of theirs gets mixed up.
+  > "This folder already has your own files in it, so I'd rather not scatter things around. I'll make one new folder inside it called `OS` — that's your workspace, everything I build goes in there and nothing else gets touched. Want me to do that, or would you rather I use a different name?"
 
-### Hold All Validated Results
-Keep everything that survived validation — writing samples, patterns, documents — in context. These feed directly into Phase 3 pre-fills and Phase 4 file generation.
+Record the agreed absolute path as **`WORKSPACE_ROOT`** and use it for every path from here on. Say it back once, plainly, and don't repeat it every message.
 
----
+**If a file called `CLAUDE.md` and a `context/` folder already exist at `WORKSPACE_ROOT`:** don't overwrite silently.
+> "This folder already has a workspace set up. I can start fresh and replace those files, or you can use `/update-context` to refresh just one part. Which would you prefer?"
 
-## Phase 3: Core Interview
+### Step 0.4 — Resume check
 
-### Teach: What We're Building
+Read `[WORKSPACE_ROOT]/.onboard-progress.json` (see **Save and resume** below for the shape).
 
-> "**Now for the interview.** I'm going to ask you about 13 questions — who you are, how you want me to sound, how you work, and what tools you use. Don't worry about getting everything perfect — you can update any of this later with `/update-context`.
->
-> **What these answers become:** I'll turn your answers into three files that live in your workspace:
-> 1. **About Me** — so I always know your role, business, and expertise
-> 2. **Voice DNA** — so I write like you, not like a robot
-> 3. **Working Style** — so I know your preferences, rules, daily tasks, and tools
->
-> **Why files, not just memory?** These files load automatically every time you open this workspace. You can read them, edit them, and they're always up to date. It's like an employee handbook, but for your AI.
->
-> Quick tip — you can click the microphone button in the chat bar to answer any of these by voice. Sometimes it's easier to just talk than type."
-
-Load `interview-questions.md` for the full question bank, including all examples. Follow these rules:
-
-### Interview Rules
-1. **One question at a time.** Wait for their answer before asking the next.
-2. **Always show examples.** Every question in the question bank has rich examples. Present them. Users can't articulate AI preferences without seeing concrete possibilities.
-3. **Pre-fill from scan.** If the Discovery Scan found info relevant to a question, show it with real examples: "Based on your emails, it looks like [X]. Here are some examples: [actual excerpts]. Is that right?"
-4. **Skip what's already answered.** If a pre-filled answer is confirmed, move on.
-5. **Be conversational.** This is a chat, not a form.
-6. **Acknowledge answers.** Brief confirmation: "Got it." / "Perfect." / "Makes sense."
-
-### Question Sequence
-
-#### Section A: About You (Q1-Q4)
-Transition: "Let's start with the basics — who you are and what you do."
-
-Ask Q1 through Q4 from `interview-questions.md`, one at a time. Each question has examples — always share them.
-
-#### Section B: Your Voice DNA (Q5-Q8)
-
-Transition — teach what Voice DNA is:
-> "**Now for the fun part — your Voice DNA.**
->
-> This is a profile of how you actually write. Not a brand guide — your personal writing fingerprint. I already have a head start from your [emails/messages/docs]. The next few questions will sharpen it.
->
-> **Why this matters:** Without Voice DNA, every AI workspace sounds the same — polished, generic, corporate. With it, when I draft an email or write a social post for you, it sounds like *you* wrote it. People who get that email won't be able to tell the difference."
-
-Ask Q5 through Q8 from `interview-questions.md`, one at a time. These should be heavily pre-filled from the discovery scan. Show actual writing samples for every voice-related question.
-
-#### Section C: How You Work (Q9-Q13)
-
-Transition:
-> "Last section — how you like to work, your rules, and your tools."
-
-Ask Q9 through Q13 from `interview-questions.md`, one at a time.
-
-**Q13 (Tool Stack) is important.** Teach why:
-> "**One more — let's map out your tools.**
->
-> This creates a reference sheet so I always know where to look for information. Instead of asking you 'where are your meeting notes?', I'll already know they're in Granola. Instead of emailing a client, I'll know you only do client comms on Slack.
->
-> The goal: reduce the number of times I have to interrupt you with a question."
-
-Load the full examples from the question bank.
-
-### After the Interview
-
-> "That's all the questions! Now I'm going to turn everything you told me into your workspace files. I'll show you each one before I save it."
+- **Not there** → normal first run. Continue to Phase 1. Don't create the file yet.
+- **`"status": "in_progress"`** → offer the choice, then wait:
+  > "Looks like we got partway through last time — we were on [phase, in plain words]. Want to pick up from there, or start fresh?"
+  On resume, re-check reality before trusting the file: confirm the folder still exists and re-verify tool connections with a real read (a tool marked `pending` may have finished connecting since). On fresh start, clear the saved state and begin at Phase 1.
+- **`"status": "complete"`** → tell them the setup is already done and offer `/update-context` for a single section, or a fresh run.
 
 ---
 
-## Phase 4: Build the Workspace
+## Save and resume
 
-### Teach: What We're Creating
+The progress file is the only thing that makes "come back later" safe. Cowork does not carry memory between conversations — a new chat starts blank — so **the file in their folder is the entire bookmark**, and resuming requires the same folder to be connected. Say that plainly when you mention resuming; never imply the chat will remember on its own.
 
-> "**Now I'm going to build your workspace — a folder called OS (your operating system).**
->
-> This is the folder you'll open in Cowork from now on. Every time you open it, I automatically read your context files before we even start talking. It's like leaving yourself a set of notes that your AI reads before every conversation.
->
-> Inside OS, you'll have:
-> - **CLAUDE.md** — the master instructions file I read first every session
-> - **context/** — your knowledge base (who you are, how you write, how you work)
-> - **active/** — where all generated output goes (research, drafts, exports, anything I create)
->
-> The **context** folder is your second brain — it's the source of truth about you and your business. Before I do anything, I check there first. The **active** folder keeps your workspace clean — instead of files piling up everywhere, everything I generate goes into organised subfolders inside active/.
->
-> You can open and edit any of these files anytime. They're yours."
+**Location:** `[WORKSPACE_ROOT]/.onboard-progress.json` — a hidden file (the leading dot keeps it out of sight) at the workspace root. It's the only hidden file this setup ever leaves behind.
 
-### Step 1: Create the OS Folder
+**Shape** (write the whole file every time, never a partial update):
 
-Create a folder called `OS` on the user's **Desktop** (`~/Desktop/OS/`) with `context/` and `active/` subfolders inside it. This is their workspace root — the folder they'll open in Cowork from now on.
+```json
+{
+  "schema_version": 1,
+  "product": "cowork-onboard",
+  "workspace_root": "<the confirmed absolute path>",
+  "status": "in_progress",
+  "phase": "interview",
+  "started_at": "2026-08-16T09:00:00Z",
+  "last_updated": "2026-08-16T09:22:00Z",
+  "sources_approved": { "email": "sam@acme.com", "calendar": "sam@acme.com", "docs": "declined" },
+  "tools": { "gmail": "connected", "google-calendar": "connected", "notion": "pending" },
+  "discovery_validated": true,
+  "answers": { "Q1": "Sam, freelance brand strategist", "Q2": "..." },
+  "files_written": ["context/about-me.md"]
+}
+```
+
+- `phase` is one of: `connect`, `consent`, `discovery`, `interview`, `build`, `complete`. The file is first written at the end of Phase 1, once `WORKSPACE_ROOT` is confirmed and there's something worth remembering.
+- `answers` holds confirmed answers by question number, so a resumed run never re-asks them.
+- `files_written` lists context files already saved, so a resumed build continues at the next one.
+- On finishing, set `status: "complete"`, drop `answers`, and keep the `workspace_root` and `phase: "complete"`.
+
+**When to write it:** at the end of each phase, after each file is written, and after each tool is connected or skipped. Not after every single question — natural pause points only.
+
+**If writing it fails:** try once more as a visible file named `onboarding-progress.md` in the same folder (same information, written as plain readable notes). If that also fails, be honest rather than silent:
+
+> "Heads up — I can't save a progress note in this folder, so if this conversation ends we'd have to start the questions again. I'll keep going, and I'll give you a short summary of your answers at the end that you can paste back to me if we ever need to."
+
+Then continue, and keep a running recap you can hand them on request.
+
+---
+
+## Phase 1: Connect tools, and verify them
+
+### Teach: why tools come first
+
+> "**First, let's connect your tools.**
+>
+> Here's why this is step one: the more I can see, the less you have to explain. If I can read the emails you've sent, I can learn how you actually write. If I can see your calendar, I understand the shape of your week. If I can look at your documents, I can find what you've already written down instead of asking you to describe it from memory.
+>
+> Think of me as a new hire on day one. Connecting tools is like giving me a login — without it, I'm working blind.
+>
+> All of it is read-only during this setup, and you'll approve each thing before I look at it."
+
+### Step 1.1 — Show the connector cards (Cowork's native way)
+
+Run a quiet `list_connectors` first to work out which surface you're on:
+
+- **A card renders** → you're in Cowork. Use `mcp__mcp-registry__suggest_connectors` to show connector cards in the chat: icons, connection status, and Connect buttons the user can click directly. Do not paste a text list of tools instead — the cards are better.
+- **Empty result or the tool isn't there** → the cards don't render here. Use the fallback in `mcp-setup-guide.md`.
+
+<HARD-GATE>
+Never tell the user a screen, panel, or card "has opened" or "should now appear" unless a tool result actually shows it. If you're not sure what they can see, ask them to tell you what's on their screen.
+</HARD-GATE>
+
+### Step 1.2 — Talk them through what's worth connecting
+
+1. **Acknowledge what's already connected:** "I can see [X and Y] are already connected — that gives us a head start."
+2. **Make the case for the most valuable missing ones**, one reason each:
+   - **Email** — "The single most useful one. Your sent emails show me how you really write, so I sound like you from day one."
+   - **Calendar** — "Shows me the shape of your week without you describing it."
+   - **Documents (Google Drive, Notion)** — "Lets me find things you've already written — an about page, a style guide, a process doc — instead of asking you to repeat them."
+   - **Team chat (Slack)** — "Another good source for how you write, plus what you're working on."
+   - **Meeting notes (Granola and similar)** — "Shows me what you're working on and how you talk."
+   Don't limit yourself to that list — if the cards show something else useful, mention it.
+3. **Ask once:** "Anything you use every day that isn't in that list? We can always add more later."
+4. **Skipping is fine.** If they'd rather not connect something, say so cheerfully and move on: the interview works without it, it just means a few more questions.
+
+### Step 1.3 — Verify each connection with one small read (ask first)
+
+A connection only counts when a read actually returns something — a tool can look connected and still be broken. But this is their inbox, so ask before you touch it, even for a check:
+
+> "Quick check so we know it's actually working: can I list the titles of a couple of recent items? Titles only — I won't open anything."
+
+Once they say yes, do exactly that one read: **titles, names, or subject lines only — never message bodies, never document contents.** The fuller question of what you may actually learn from comes next, in Phase 2. If they'd rather you didn't check, that's fine: say the connection is unverified and move on.
+
+Report the result honestly:
+
+| Tool | Verification read | What proves it |
+|---|---|---|
+| Email | list the few most recent messages | subject lines come back |
+| Calendar | list today's or this week's events | event titles come back |
+| Drive / files | list a few recent file names | file names come back |
+| Notion | search for any recent page | page titles come back |
+| Slack | list channels | channel names come back |
+
+- **It works** → "That's live — I can see your [emails/events/files]."
+- **It fails** → try one fix (usually reconnecting and picking the right account). Still failing: "No problem, let's leave that one. We can add it later." Mark it `skipped` in the progress file and move on. Never let one tool block the flow.
+
+Save progress (`phase: "connect"`).
+
+---
+
+## Phase 2: Confirm exactly what I may look at
+
+<HARD-GATE>
+Beyond the single titles-only connection check in Step 1.3, do NOT read any email, event, document, message, or transcript before the user has approved that source here. Approval is per source, out loud, and specific about the account. If they decline a source, it is off-limits for the rest of the run — including its titles.
+</HARD-GATE>
+
+### Teach: why I'm asking
+
+> "Now, before I actually read anything, I want to be clear about what I'd be looking at — it's your inbox and your calendar, and you should decide, not me.
+>
+> I only need a little, and only to save you typing. Here's exactly what I'd look at, and you can say no to any of it."
+
+### Step 2.1 — Name the account, then ask per source
+
+For each connected source, state the account identity you can actually see (the email address or workspace name the tool reports — if you can't see it, ask), say precisely what you'd read and how far back, then ask for a yes or no. One at a time.
+
+> "**Email — `[account the tool reports]`.** I'd read about 20 of your own recent sent messages from the last 30 days, to learn how you write: greetings, sign-offs, sentence length, that kind of thing. I won't open anything else in your inbox. OK to look?"
+
+> "**Calendar — `[account]`.** I'd look at event titles and times for the next couple of weeks, just to understand your week. I don't need the invitee lists or the notes. OK?"
+
+> "**Documents — `[account/workspace]`.** I'd search for files whose names suggest they describe you or your business — an about page, a style or brand guide, a process doc. I'll show you the list and only open the ones you pick. OK?"
+
+> "**Team chat / meeting notes — `[account/workspace]`.** I'd read a handful of your own recent messages or notes for writing style. OK?"
+
+Rules for this step:
+
+- **More than one account connected?** Ask which one to use. Never scan both because both are available.
+- **A shared or work account?** Ask before reading it: "That looks like a work account — happy for me to read from it, or would you rather I use a personal one?"
+- **"No" or "skip"** is a complete answer. Record it as `declined` and never revisit it in this run.
+- **Documents get a second gate**: names first, contents only after they pick.
+- Record every decision in the progress file under `sources_approved`, then save (`phase: "consent"`).
+
+---
+
+## Phase 3: Discovery — learn from the approved sources only
+
+### Teach: what's happening
+
+> "Right, I'm going to read the sources you approved and see what I can learn — mainly how you write, plus anything that describes your business.
+>
+> **Why:** in a few minutes I'll write a 'Voice DNA' file — a description of how you write, so that in future I sound like you instead of like a generic AI. Real examples of your own writing make that far more accurate than anything you could describe from memory."
+
+### Step 3.1 — Scan (approved sources only)
+
+**Writing style** — from approved email/chat/meeting sources:
+- Pull recent messages the user themselves sent, to real people (not automated replies or notifications).
+- Collect 3–5 representative samples from each approved source.
+- Note the patterns: greeting, sign-off, sentence length, formality, humour, punctuation habits, emoji use.
+
+**Business context** — from approved document sources:
+- Look for names suggesting a brand or style guide, an about page or bio, a company description, a process document or SOP, a client proposal.
+- Show the shortlist of names and let the user pick which to open. Only open those.
+
+**Light context** — from what you already have: an email signature (name, role, company), what recent threads are about, channel or calendar names that reveal projects and teams.
+
+**Stay inside the limits you stated.** If a limit turns out to be too small, ask for more rather than quietly widening it.
+
+### Step 3.2 — Ask where else their writing lives
+
+> "Some of your best writing probably isn't in any of those. Anywhere else it shows up — a newsletter, blog posts, LinkedIn or X, YouTube scripts, community posts? Paste a couple of samples here if you have them handy. Totally optional."
+
+Wait. Add anything they paste to the samples. "No" moves on.
+
+### Step 3.3 — Show what you found, with a receipt
+
+Be specific, quote their actual words, and say what you read:
+
+> "Here's what I found.
+>
+> **What I looked at:** [e.g. 18 sent emails from the last 30 days, 12 calendar events, 2 documents you picked].
+>
+> **How you write:** [conversational / professional / direct…], usually [short and to the point / detailed / warm].
+>
+> **Your actual words:**
+> 1. *[source]*: '[real excerpt]'
+> 2. *[source]*: '[real excerpt]'
+> 3. *[source]*: '[real excerpt]'
+>
+> **Patterns:** you [always/never/usually] [pattern]; your greetings are usually [style]; your sign-offs are usually [style].
+>
+> **About your business:** [what the bio / about page / signature says]."
+
+If nothing useful came back (nothing connected, or nothing approved):
+> "I didn't find anything to learn from — no problem at all. We'll build it from your answers instead; it just means a few more questions."
+
+---
+
+## Phase 4: Validation gate — you correct me before I write anything
+
+<HARD-GATE>
+Do NOT continue to the interview until the user has explicitly validated what you found. Not optional.
+</HARD-GATE>
+
+> "Before we go on — be ruthless with me here.
+>
+> **Check what's above and tell me if anything is:**
+> - **Out of date** — an old role, old company, guidelines that don't apply any more
+> - **Wrong** — I've misread something, or it just isn't you
+> - **Not relevant** — a stale document, a dead project, a one-off email that isn't how you normally write
+>
+> I'd much rather you over-correct now than have me treat an old document as fact for the next year.
+>
+> **What should I drop or fix?**"
+
+Wait. Remove or correct whatever they flag — no arguing. If they say it looks good, confirm once: "Great, I'll treat all of that as current." Keep everything that survived; it feeds the interview pre-fills and the files. Save progress (`phase: "discovery"`, `discovery_validated: true`).
+
+---
+
+## Phase 5: The interview
+
+### Teach: what we're doing and what it becomes
+
+> "**Now the interview — around 13 questions**, one at a time. Nothing here has to be perfect; you can change any of it later with `/update-context`.
+>
+> **Your answers become three files in your workspace:**
+> 1. **About Me** — your role, your business, what you're expert in
+> 2. **Voice DNA** — how you write, so I sound like you
+> 3. **Working Style** — how you like things done, your rules, your routines, your tools
+>
+> **Why files rather than me just remembering?** Because a new conversation starts blank. Files don't — they load every time you open this folder, and you can read and edit them yourself. It's a handbook for your AI.
+>
+> Tip: you can answer by voice with the microphone button in the chat bar if talking is easier than typing."
+
+Load `interview-questions.md` for the full bank, including every example. Then:
+
+1. **One question at a time.** Wait for the answer.
+2. **Always show the examples.** They're in the bank for a reason.
+3. **Pre-fill from what survived validation:** "From your emails it looks like [X] — here are the bits I'm going by: [real excerpts]. Right?"
+4. **Skip what's already settled.** A confirmed pre-fill needs no second question.
+5. **Acknowledge briefly.** "Got it." "Makes sense." Not "what a wonderful answer".
+6. **Short answers are fine.** Never push. "Skip" is allowed on any question.
+7. **Save progress every few answers** — `answers` by question number, `phase: "interview"`.
+
+**Section A: About you (Q1–Q4).** "Let's start with the basics — who you are and what you do."
+
+**Section B: Your Voice DNA (Q5–Q8).** Transition:
+> "**Now the interesting part — your Voice DNA.** This is your writing fingerprint, not a brand guide. I've got a head start from your [emails/messages/docs]; these questions sharpen it.
+>
+> **Why it matters:** without it, everything I write comes out polished and generic. With it, an email I draft sounds like you wrote it."
+
+These should be heavily pre-filled. Show real samples with every voice question.
+
+**Section C: How you work (Q9–Q13).** Transition: "Last stretch — how you like to work, your rules, and your tools."
+
+Q13 (the tool map) earns its own line:
+> "**Last one — let's map your tools.** This is so I know where to look instead of asking you. If your meeting notes live in Granola, I'll go there. If client conversations only happen on Slack, I won't draft an email. The goal is fewer interruptions for you."
+
+### After the interview
+
+> "That's all the questions. Now I'll turn your answers into your workspace files — and I'll show you each one before anything gets saved."
+
+---
+
+## Phase 6: Preview the files
+
+### Teach: what we're building
+
+> "**Here's the shape of your workspace:**
+>
+> - **CLAUDE.md** — your master instructions. The first thing I read in every new conversation.
+> - **context/** — your second brain: who you are, how you write, how you work.
+> - **active/** — where anything I make for you goes: research, drafts, exports. Keeps the rest tidy.
+>
+> Everything in there is plain text. You can open it, read it, edit it — it's yours, and it isn't locked inside any app."
+
+Generate each file from the interview answers plus the validated discovery, and show it in full before writing.
+
+### context/about-me.md
+
+From Q1–Q4:
+
+```markdown
+# About Me
+
+## Identity
+- **Name**: [Q1]
+- **Role**: [Q1]
+- **Business**: [Q2]
+
+## Expertise
+[Q4]
+
+## Daily Focus
+[Q3, written as natural language]
+
+## Key Context
+[anything else useful that survived validation]
+```
+
+### context/voice-dna.md
+
+From Q5–Q8 plus every validated writing sample. **This is the file that earns its keep — make it rich and specific, not four vague sentences.** Start with the base rules from `voice-dna-base.md`, then layer their own style on top.
+
+```markdown
+# Voice DNA
+
+## Base Writing Rules
+[embed the contents of voice-dna-base.md here]
+
+## My Tone
+[Q5 — a real description, not one word]
+
+## Voice Characteristics
+[Q7 — expanded, with concrete examples of what it sounds like in practice]
+
+## Language Preferences
+### Words and phrases I use
+[Q6 — specific words, greetings, sign-offs, expressions]
+
+### Words and phrases I never use
+[Q6 — what to avoid]
+
+## Anti-Voice
+[Q8 — what I must never sound like, with examples]
+
+## Writing Samples
+Real examples of how I write. Use these for tone, style, and pacing.
+
+### Email Examples
+[3–5 real excerpts — the best examples of their natural writing]
+
+### Message Examples
+[1–3 chat examples if available]
+
+### Other Writing
+[anything they pasted: newsletter, blog, social]
+
+## Writing Patterns
+- Greeting style: [e.g. "Hey [name],"]
+- Sign-off style: [e.g. "Cheers,"]
+- Sentence length: [e.g. short and punchy]
+- Punctuation: [e.g. rarely uses exclamation marks, never emojis]
+- Paragraph style: [e.g. short paragraphs with plenty of line breaks]
+- Instruction style: [e.g. direct and clear]
+```
+
+Include every sample that survived validation. More real examples means a closer match later.
+
+### context/working-style.md
+
+From Q9–Q13:
+
+```markdown
+# Working Style
+
+## Output Preferences
+[Q9 — as clear instructions]
+
+## Rules
+[Q10 — one bullet per rule]
+
+## Daily Routines
+[Q11]
+
+## Weekly Routines
+[Q12]
+
+## Tools & Workflows
+
+| Tool | Used for | Notes |
+|---|---|---|
+| [tool] | [what it's for] | [e.g. "check here before asking me"] |
+
+[Q13 — every tool they mentioned]
+
+### Tool Rules
+[tool-specific preferences from Q13, e.g. "client comms on Slack, never email"]
+```
+
+### CLAUDE.md
+
+Teach it first:
+
+> "**The most important file: CLAUDE.md.**
+>
+> It's the first thing I read in every new conversation. It pulls in your context files and holds your rules — so before we've said a word, I already know who you are, how you write, how you work, and what to avoid. You never have to explain yourself twice.
+>
+> It also carries two habits:
+>
+> 1. **Look it up before asking you** — I check your context files and your connected tools first, and only come to you when I genuinely can't find the answer.
+> 2. **Corrections become permanent** — when you correct me, I write it down as a rule in this file, so the same mistake doesn't come back."
+
+```markdown
+# [Name]'s AI Workspace
+
+## Context — my second brain
+
+@context/
+
+The context folder is the source of truth for who [Name] is, how they write, how they work, and what tools they use. It loads automatically through the line above.
+
+**Check context before asking.** Don't work from assumptions — find the answer. If `context/` doesn't have it, check the connected tools before asking [Name]. Only ask once you've genuinely run out of places to look.
+
+## Workspace structure
+
+    [workspace folder name]/
+    ├── CLAUDE.md          ← this file (master instructions)
+    ├── context/           ← second brain (about-me, voice-dna, working-style)
+    └── active/            ← everything generated (research, drafts, exports)
+
+Keep this map up to date as the workspace grows, so a future session can navigate without exploring.
+
+## Instructions
+
+### Communication
+- Follow the Voice DNA in everything written for [Name]
+- Match the output preferences in the working style file
+- Use the writing samples as the reference for tone and pacing
+
+### Tools
+[one line per connected tool, from Q13 — e.g.:]
+- Notion: project management — check here for project status before asking
+- Gmail: email — never send anything without showing the draft first
+- Slack: team and client conversations
+- Granola: meeting notes — check here for meeting context
+
+### Rules
+- Everything generated goes in `active/`, in a sensible subfolder (`active/research/`, `active/drafts/`, `active/exports/`). Don't leave files loose at the root.
+[the hard rules from Q10, written as clear instructions]
+
+---
+
+## Self-Correcting Rules Engine
+
+A growing set of rules that makes this workspace better over time. **Read every learned rule at the start of a session, before doing anything.**
+
+### How it works
+1. When [Name] corrects you, **append a new rule** to the list below straight away
+2. Number them: `N. [CATEGORY] Always/Never do X — because Y`
+3. Categories: `[STYLE]` `[TONE]` `[TOOL]` `[PREFERENCE]` `[PROCESS]` `[FORMAT]` `[COMMS]`
+4. Scan the rules before starting any task
+5. If two rules conflict, the newer (higher-numbered) one wins
+6. Update a rule in place rather than adding a near-duplicate
+
+### When to add a rule
+- [Name] corrects your output ("no, do it this way")
+- [Name] rejects a file, a format, or an approach
+- [Name] states a preference ("always X", "never Y")
+- You discover something about a tool that a future session needs to know
+
+### Learned Rules
+[Rules get added here as [Name] works]
+```
+
+### Approval
+
+Show the files one at a time and wait for a yes on each:
+
+> "Here's your **About Me** file: [full content]. Look right?"
+
+For Voice DNA, ask specifically:
+> "Here's your **Voice DNA** — this is how I'll write as you from now on. Have a proper look at the samples and patterns. Anything off?"
+
+Make any changes they ask for and show it again. Nothing gets written without a yes.
+
+---
+
+## Phase 7: Build it, then prove it
+
+<HARD-GATE>
+Never say a folder or file was created until you have listed the path and seen it. If a write fails, say so plainly and stop — do not report success you didn't verify.
+</HARD-GATE>
+
+### Step 7.1 — Create the folders
+
+Using your file tools (not assumed terminal commands), create inside `WORKSPACE_ROOT`:
+
+- `context/`
+- `active/`
+
+Then **list `WORKSPACE_ROOT` and check both appear.**
+
+### Step 7.2 — Write the approved files
+
+Write, one at a time, updating `files_written` in the progress file after each:
+
+- `[WORKSPACE_ROOT]/context/about-me.md`
+- `[WORKSPACE_ROOT]/context/voice-dna.md`
+- `[WORKSPACE_ROOT]/context/working-style.md`
+- `[WORKSPACE_ROOT]/CLAUDE.md`
+
+### Step 7.3 — Verify and show the evidence
+
+List the workspace folder and its `context/` folder, then show the user the real listing:
 
 ```
-~/Desktop/OS/
+[workspace folder]/
   CLAUDE.md
   context/
     about-me.md
@@ -304,379 +592,73 @@ Create a folder called `OS` on the user's **Desktop** (`~/Desktop/OS/`) with `co
   active/
 ```
 
-### Step 2: Generate Context Files
+Every file above must appear in an actual listing before you claim the workspace is built. If something is missing: say which file didn't save, try once more, and if it still fails explain what you'd need (usually write access to that folder) instead of glossing over it.
 
-Using the interview answers AND the validated discovery scan data, generate three files. **Show each file to the user before writing it.**
+**If a write is refused** — the most likely cause is that the folder isn't connected with permission to write. Say that in plain words and ask them to connect it, then continue from here. Never redirect the files somewhere else without asking.
 
-#### context/about-me.md
-Generate from Q1-Q4. Structure:
-```markdown
-# About Me
-
-## Identity
-- **Name**: [from Q1]
-- **Role**: [from Q1]
-- **Business**: [from Q2]
-
-## Expertise
-[from Q4]
-
-## Daily Focus
-[from Q3 — translate the multi-select into natural language]
-
-## Key Context
-[anything extra from the discovery scan that adds useful context]
-```
-
-#### context/voice-dna.md
-Generate from Q5-Q8 + the validated discovery scan writing samples from ALL sources. This is the most important file — it should be rich and specific, not a few light sentences.
-
-**Start with the base writing rules** from `voice-dna-base.md`, then layer the user's personal style on top.
-
-Structure:
-```markdown
-# Voice DNA
-
-## Base Writing Rules
-[embed the contents of voice-dna-base.md here — these are the foundation rules for natural, human-sounding writing that apply regardless of personal style]
-
-## My Tone
-[from Q5 — detailed description of their communication style, not just one word]
-
-## Voice Characteristics
-[from Q7 — expand into rich descriptions with concrete examples of what this sounds like in practice]
-
-## Language Preferences
-### Words and phrases I use
-[from Q6 — specific words, greetings, sign-offs, expressions]
-
-### Words and phrases I never use
-[from Q6 — specific words, phrases, patterns to avoid]
-
-## Anti-Voice
-[from Q8 — what I must never sound like, with specific examples]
-
-## Writing Samples
-These are real examples of how I write. Use these as a reference for tone, style, and pacing.
-
-### Email Examples
-[3-5 actual email excerpts from the discovery scan — the best examples of their natural writing style]
-
-### Message Examples
-[1-3 Slack/chat message examples if available]
-
-### Other Writing
-[any additional samples from newsletters, blog posts, social media, etc. that the user provided]
-
-## Writing Patterns
-Observed patterns from my actual writing:
-- Greeting style: [e.g., "Hey [name]," / "Hi [name]," / "[name],"]
-- Sign-off style: [e.g., "Cheers," / "Best," / "Thanks!"]
-- Sentence length: [e.g., "Short and punchy" / "Mix of short and long"]
-- Punctuation: [e.g., "Uses exclamation marks occasionally" / "Never uses emojis"]
-- Paragraph style: [e.g., "Short paragraphs, lots of line breaks" / "Dense paragraphs"]
-- Instruction style: [e.g., "Direct and clear" / "Collaborative — 'what do you think?'"]
-```
-
-**This file should be comprehensive.** Include every validated writing sample. Include every pattern. The more examples, the better Claude can match the user's voice in future sessions.
-
-#### context/working-style.md
-Generate from Q9-Q13. Structure:
-```markdown
-# Working Style
-
-## Output Preferences
-[from Q9 — translate the choice into clear instructions]
-
-## Rules
-[from Q10 — each rule as a clear bullet point]
-
-## Daily Tasks
-[from Q11 — the tasks they repeat daily]
-
-## Weekly Tasks
-[from Q12 — the tasks they repeat weekly]
-
-## Tools & Workflows
-
-| Tool | Used For | Preferences |
-|------|----------|-------------|
-| [tool name] | [what they use it for] | [any preferences, e.g., "check here before asking me"] |
-| [tool name] | [what they use it for] | [preferences] |
-| ... | ... | ... |
-
-[from Q13 — every tool they mentioned, formatted as a clear reference table]
-
-### Tool Rules
-[any tool-specific rules or preferences from Q13, e.g., "Client comms only on Slack, never email"]
-```
-
-### Step 3: Preview and Confirm
-
-Show each file one at a time:
-> "Here's your **About Me** context file: [show content]. Look good?"
-
-Wait for confirmation before moving to the next. If they want changes, make them.
-
-**For Voice DNA especially**: Show it and ask:
-> "Here's your **Voice DNA** — this is how I'll write as you from now on. Take a look at the writing samples and patterns. Anything I should adjust?"
-
-### Step 4: Write Context Files
-
-After all three are approved, write them to `~/Desktop/OS/context/`:
-- `~/Desktop/OS/context/about-me.md`
-- `~/Desktop/OS/context/voice-dna.md`
-- `~/Desktop/OS/context/working-style.md`
-
-### Teach: What CLAUDE.md Is
-
-> "**Now for the most important file in your workspace — CLAUDE.md.**
->
-> This is your master instructions file. It's the very first thing I read every time you start a new conversation. It imports your context files and contains your rules.
->
-> Think of it like a briefing document. Before we talk about anything, I've already read: who you are, how you write, how you work, what tools you use, and what rules to follow. You never have to re-explain yourself.
->
-> It also has two important built-in behaviours:
->
-> 1. **Context-first philosophy** — before I do anything, I check your context files and connected tools for answers. I only ask you a question as a last resort, once I've exhausted everything I can look up myself. No lazy questions.
->
-> 2. **Self-correcting rules engine** — every time you correct me, I write it down as a permanent rule. So if you say 'don't do that', it never happens again. Over time, this workspace gets smarter the more you use it."
-
-### Step 5: Generate and Write CLAUDE.md
-
-Create the master instruction file with the self-correcting rules engine:
-
-```markdown
-# [Name]'s AI Workspace
-
-## Context — Second Brain
-
-@context/
-
-The context folder is the source of truth for who [Name] is, how they write, how they work, and what tools they use. It is loaded automatically above.
-
-**Before any task or question, check context first.** Don't work from assumptions — find the answer. If context/ doesn't have it, check connected tools (Gmail, Notion, Slack, Granola, calendar) before asking [Name]. Only come to [Name] with a question once you've exhausted all available sources.
-
-**Assumptions are the enemy.** Every decision and answer must be rooted in fact — from context files, from connected tools, or from the workspace itself. If you're unsure, look it up. If you can't find it anywhere, then ask.
-
-## Workspace Structure
-
-```
-OS/
-├── CLAUDE.md          ← this file (master instructions)
-├── context/           ← second brain (about-me, voice-dna, working-style)
-└── active/            ← all generated output (research, drafts, exports)
-```
-
-[Update this map as the workspace grows — add new folders and descriptions so future sessions can navigate without exploring.]
-
-## Instructions
-
-### Communication
-- Follow the Voice DNA guidelines in all output
-- Match the output preferences in the working style guide
-- Use the writing samples as reference for tone and style
-
-### Tools
-[list each connected tool with usage from Q13, e.g.:]
-- Notion: project management — check here for project status before asking
-- Gmail: email — never send without showing draft first
-- Slack: team and client comms — primary channel for client communication
-- Granola: meeting notes — check here for meeting context
-
-### Rules
-- All generated output goes in `active/` — don't pollute root. Use structured subfolders within active/ (e.g., `active/research/`, `active/drafts/`, `active/exports/`). Create a subfolder when a new type of output emerges.
-[hard rules from Q10, formatted as clear instructions]
+Save progress (`phase: "build"`).
 
 ---
 
-## Self-Correcting Rules Engine
+## Phase 8: Wrap up
 
-This section contains a growing ruleset that improves over time. **At session start, read all learned rules before doing anything.**
-
-### How It Works
-1. When [Name] corrects you or you make a mistake, **immediately append a new rule** to the "Learned Rules" section below
-2. Rules are numbered sequentially: `N. [CATEGORY] Never/Always do X — because Y`
-3. Categories: `[STYLE]` `[TONE]` `[TOOL]` `[PREFERENCE]` `[PROCESS]` `[FORMAT]` `[COMMS]`
-4. Before starting any task, scan all rules for relevant constraints
-5. If two rules conflict, the higher-numbered (newer) rule wins
-6. Keep rules current — update in place rather than appending duplicates
-
-### When to Add a Rule
-- [Name] explicitly corrects your output ("no, do it this way")
-- [Name] rejects a file, approach, or pattern
-- [Name] states a preference ("always use X", "never do Y")
-- You discover something doesn't work as expected with tools or workflows
-
-### Learned Rules
-[Rules will be added here as [Name] works with the workspace]
-```
-
-Show preview and get confirmation. Write CLAUDE.md to `~/Desktop/OS/CLAUDE.md`.
-
-### Teach: What Skills Are
-
-> "**Your workspace foundation is done. Now let's add skills on top of it.**
+> "**Your workspace is ready.** Here's what's in it and why it matters:
 >
-> A skill is a set of instructions that tells me how to do a specific task for you. Think of it like a recipe card. Right now, I can do anything you ask — but I'll do it generically. A skill makes me do it *your* way, with *your* tools, in *your* voice.
->
-> I'm going to create two skills based on what you told me:
->
-> 1. **Morning Brief** — a daily summary of your calendar, inbox, and priorities. Instead of you opening 5 tabs and checking everything manually, you just say 'morning brief' and I give you a single summary.
->
-> 2. **Inbox Triage** — I read your unread emails, filter out the noise, and categorize what's left by urgency. You get a clean list of what actually needs your attention.
->
-> **How skills work in Cowork:** Skills are saved globally in the Cowork app — not inside your OS folder. They're available across all your projects. I'll show you each skill in chat, and Cowork will give you a **'Save Skill' button** to save it. Just click that button for each one."
-
-### Step 6: Generate Personalized Skills
-
-Load `skill-templates.md` and generate two personalized skills.
-
-#### Morning Brief Skill
-Generate the morning-brief skill using the template. Fill in:
-- Which tools are connected (calendar, email) — from Q13
-- Their daily tasks (Q11)
-- Their output preferences (Q9)
-- Their voice character (Q7)
-- Relevant hard rules (Q10)
-- Tool preferences (Q13)
-
-**Replace all template placeholders with actual values.** The output should be a clean skill with no template syntax.
-
-#### Inbox Triage Skill
-Generate the inbox-triage skill using the template. Fill in:
-- Their role and business (Q1, Q2)
-- Their daily focus (Q3)
-- Their hard rules (Q10)
-- Their daily tasks (Q11) — for categorization context
-- Their output preferences (Q9)
-- Their voice character (Q7)
-- Email tool preferences (Q13)
-
-**Replace all template placeholders with actual values.**
-
-### Step 7: Present Skills for Saving
-
-<IMPORTANT>
-Do NOT write skills to the filesystem. Cowork cannot create skill files in `.claude/skills/`. Instead, output each skill's full content directly in chat. Cowork will automatically show a "Save Skill" button that the user clicks to save it globally.
-</IMPORTANT>
-
-For each skill:
-
-1. Show the complete skill content in chat (the full SKILL.md content including YAML frontmatter)
-2. Tell the user: "You should see a **'Save Skill' button** above. Click it to save this skill to your Cowork app."
-3. Wait for them to confirm they saved it
-4. Then move to the next skill
-
-> "Here's your personalized **Morning Brief** skill. Click the **'Save Skill' button** that appears above to add it to your Cowork. Once it's saved, you can use it anytime by saying 'morning brief'."
->
-> [output the full morning-brief skill content]
-
-After they confirm:
-
-> "Now here's your **Inbox Triage** skill. Same thing — click **'Save Skill'** to add it."
->
-> [output the full inbox-triage skill content]
-
-### Teach: What Scheduled Tasks Are
-
-> "**Now let's automate these.**
->
-> Right now you'd have to open Cowork and type 'morning brief' every day. But we can schedule it to run automatically — so when you sit down with your coffee, the brief is already waiting for you.
->
-> Same for inbox triage — it can run a few times a day so your inbox is always pre-sorted."
-
-### Step 8: Set up Scheduled Tasks
-
-Ask the user:
-> "What time do you usually start your day? I'll schedule your morning brief for then."
-
-Then:
-> "And how often should I triage your inbox?"
-> - Once in the morning
-> - Morning and afternoon
-> - Three times: morning, midday, and evening
-
-Set up scheduled tasks using the `/schedule` skill. For each task, invoke `/schedule` with:
-- **Morning brief**: `create` a scheduled trigger that runs the `morning-brief` skill daily at their chosen time (e.g., "every day at 7am")
-- **Inbox triage**: `create` a scheduled trigger that runs the `inbox-triage` skill at their chosen frequency (e.g., "every day at 9am, 1pm, and 5pm")
-
-If the `/schedule` skill is not available, or scheduling fails, provide manual instructions: "Scheduling isn't set up yet, but you can run these anytime by saying 'morning brief' or 'triage my inbox'. You can set up automation later with the `/schedule` command."
-
----
-
-## Phase 5: Wrap-up
-
-### Skill Recommendations
-
-Load `skill-recommendation-map.md`. Based on Q3 (daily focus) and Q11/Q12 (tasks), recommend 2-3 relevant skills:
-
-> "**One more thing — skill recommendations.**
->
-> Remember how we created the morning brief and inbox triage skills? There are loads more you can add. Based on what you do day-to-day, these would be useful:
->
-> 1. **[skill]** — [what it does for them, in plain language]
-> 2. **[skill]** — [what it does for them]
-> 3. **[skill]** — [what it does for them]
->
-> These are optional — you can install them anytime by asking me."
-
-### Summary and Education Recap
-
-> "**Your workspace is ready! Here's what we built and why:**
->
-> **Your OS folder** (on your Desktop — open this in Cowork from now on):
+> **In `[workspace folder]`:**
 > - `CLAUDE.md` — master instructions, the first thing I read every session
-> - `context/` — your second brain (who you are, how you write, how you work)
-> - `active/` — where all generated output goes (keeps your workspace clean)
+> - `context/about-me.md` — your role, business, expertise
+> - `context/voice-dna.md` — how you write, with real samples
+> - `context/working-style.md` — your preferences, rules, routines, tools
+> - `active/` — where anything I make for you lands
 >
-> **Built-in behaviours:**
-> - **Context-first** — I always check your context files and tools before asking you anything
-> - **Self-correcting** — every correction becomes a permanent rule, so mistakes don't repeat
-> - **Clean workspace** — all output goes in `active/` with organised subfolders
+> **Built-in habits:**
+> - I look things up in your context and tools before asking you
+> - When you correct me, it becomes a permanent rule in CLAUDE.md
+> - Generated files go in `active/`, so the folder stays tidy
 >
-> **Skills** (saved globally in Cowork, available everywhere):
-> - Morning brief — say 'morning brief' for a daily summary
-> - Inbox triage — say 'triage my inbox' to sort your email
+> **How to use it:** open this folder in Cowork whenever you want to work with me. Every new conversation starts with me already knowing who you are.
 >
-> **Scheduled automation:**
-> - Morning brief: daily at [time]
-> - Inbox triage: [frequency]
+> **To change anything:** run `/update-context` and pick the part you want to refresh. Or just open the file and edit it yourself — it's plain text.
 >
-> **How to use it:** Close this chat, then open the **OS folder** in Cowork. That's your workspace from now on. Every new conversation will start with me already knowing who you are and how you work.
+> **What I deliberately didn't do:** I haven't created any skills and I haven't set anything running on a schedule. This setup is your foundation — nothing runs by itself.
 >
-> **How it gets better over time:** Every time you correct me, I add a rule to CLAUDE.md. Every time you update a preference, the context files change. This workspace learns. It's not static — it grows with you.
->
-> **Useful commands to remember:**
-> - `/update-context` — update any part of your workspace
-> - `morning brief` — run your daily briefing
-> - `triage my inbox` — sort your email
->
-> You're all set. Open your OS folder and try saying 'morning brief' to take it for a spin!"
+> Try it: start a new conversation in this folder and ask me something about your business. You'll notice I already know the answer."
+
+Finally: write the progress file with `status: "complete"` and `phase: "complete"`, and confirm to yourself that `workspace_root` is saved.
 
 ---
 
-## Tone Guidelines
+## Tone guidelines
 
-Throughout the entire onboarding:
-- **Warm but not cheesy.** Friendly, professional, encouraging.
-- **Teacher mode.** Explain concepts clearly, use analogies, make sure they understand before moving on.
-- **Brief acknowledgments.** "Got it." "Perfect." "Makes sense." — not "That's a wonderful answer!"
-- **No jargon.** Say "tools" not "MCPs". Say "instructions file" not "CLAUDE.md" (until you explain it). Say "recipe card" not "skill" (until you explain it).
-- **Explain jargon when you introduce it.** When you first use a term like "context file" or "skill", explain what it means in plain language.
-- **Encouraging.** "You're doing great" if they seem hesitant. But don't overdo it.
-- **Respect their time.** Keep educational moments concise — 2-4 sentences, not lectures. Teach through doing, not through essays.
-- **Show, don't ask.** Wherever possible, show what you found and ask them to confirm, rather than asking them to explain from scratch.
-- **Use analogies.** "Like a new hire's first day", "Like a recipe card", "Like a briefing document". Real-world comparisons land better than abstract explanations.
+- **Warm, not cheesy.** Friendly, encouraging, calm.
+- **Teacher mode, briefly.** 2–4 sentences per explanation, never a lecture. Teach through doing.
+- **Short acknowledgements.** "Got it." "Perfect." "Makes sense."
+- **No jargon.** Say "tools" not "MCPs"; say "instructions file" until you've explained what CLAUDE.md is.
+- **Use everyday analogies.** A new hire's first day. A briefing document. An employee handbook.
+- **Show, don't quiz.** Where you can, show what you found and ask them to confirm it.
+- **Honest, always.** If something didn't work, say so. A cheerful false claim costs you all their trust.
 
-## Error Handling
+## Error handling
 
-- **Tool connection fails**: Note it, move on, offer to retry later
-- **Discovery scan finds nothing**: Skip gracefully, interview from scratch with extra examples
-- **Discovery scan finds very little**: Use what you have, supplement with more examples during interview
-- **User gives very short answers**: That's fine. Work with what you have. Don't push for more.
-- **User wants to skip a question**: Skip it. Use reasonable defaults or leave the section minimal.
-- **User wants to stop mid-flow**: Save progress so far. Tell them they can resume with `/onboard` or refine with `/update-context`.
-- **Scheduling fails**: Provide manual instructions as fallback
-- **User seems confused**: Pause and re-explain the current concept. Ask "Does that make sense?" before continuing.
-- **suggest_connectors unavailable**: Fall back to manual tool selection using `mcp-setup-guide.md`
+- **No folder connected** → stop at Phase 0.2 and ask them to connect one. Never guess a path.
+- **A tool won't connect** → one retry, then mark it skipped and move on.
+- **A source is declined** → fine. It's off-limits for the whole run; the interview covers the gap.
+- **Nothing found in discovery** → say so, and interview from scratch with extra examples.
+- **Very short answers** → work with what you have. Don't push.
+- **They want to skip a question** → skip it and keep the section light.
+- **They want to stop** → save progress, then: "All saved. When you're ready, open this same folder in Cowork and run `/onboard` — I'll pick up right where we left off."
+- **A write fails** → name the file, retry once, then explain honestly what's blocking it.
+- **The progress file can't be written** → tell them resume won't be automatic, and offer the recap they can paste back.
+- **Connector cards don't render** → use `mcp-setup-guide.md`, and never claim a screen appeared.
+- **They seem confused** → stop and re-explain the current idea. "Does that make sense?" before moving on.
+
+---
+
+## Self-Improvement Loop
+
+After a run, propose a one-line change to this skill **only if it would change what a future run does** — a step that confused a real user, a claim that turned out to be false, a check that should have existed. High bar: most runs propose nothing.
+
+- **Running from Remy's source checkout of `cowork-onboard`?** On approval, edit this `SKILL.md` (or the support file concerned) in place and commit it to the repo, then bump the version in `plugin.json`, `.claude-plugin/plugin.json`, and `.claude-plugin/marketplace.json` together and run `scripts/check_plugin.py`.
+- **Running as an installed plugin?** The installed copy is a read-only snapshot and edits there would vanish on the next update. Instead, tell the user the one-line improvement and ask them to send it to AI with Remy so it lands in the plugin for everyone.
+
+Never silently change behaviour in someone's installed copy, and never write to a file outside the confirmed workspace to record a proposal.

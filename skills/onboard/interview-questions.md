@@ -1,6 +1,8 @@
 # Interview Question Bank
 
-Reference for the core interview in Phase 3. The main SKILL.md orchestrates when and how to ask these — this file contains the full question details, format guidance, pre-fill logic, and example answers.
+Reference for the core interview (Phase 5 of `SKILL.md`). The main SKILL.md orchestrates when and how to ask these — this file contains the full question details, format guidance, pre-fill logic, and example answers.
+
+**Pre-fill only from approved sources.** Every pre-fill below assumes the user already approved that source in Phase 2 and validated what was found in Phase 4. Never pre-fill from something they declined, and never go back to a source for "one more look" without asking.
 
 ## General Approach
 
@@ -55,7 +57,7 @@ Reference for the core interview in Phase 3. The main SKILL.md orchestrates when
 > - If client work: "Are you mostly on calls, building deliverables, managing projects, or a mix?"
 > - If operations: "Is that bookkeeping, invoicing, scheduling, hiring, or something else?"
 
-**Maps to**: about-me.md → Daily Focus section, feeds Phase 4 skill generation + Phase 5 skill recommendations
+**Maps to**: about-me.md → Daily Focus section
 
 ### Q4: Area of Expertise
 **Ask**: "What's your area of expertise — the thing I should know you're deeply knowledgeable about? This helps me give you better answers and not explain things you already know."
@@ -246,7 +248,7 @@ Show real examples from the discovery scan, then present the spectrum:
 
 **Follow-up**: "Anything else that's part of your daily routine, even if it seems small? Things like checking a specific dashboard, updating a specific spreadsheet, reviewing a specific Slack channel?"
 
-**Maps to**: working-style.md → Daily Tasks section, feeds morning-brief skill generation, feeds inbox-triage skill generation
+**Maps to**: working-style.md → Daily Routines section
 
 ### Q12: Weekly Repeated Tasks
 **Ask**: "What about weekly tasks? Things that happen on a specific day or once a week."
@@ -268,7 +270,7 @@ Show real examples from the discovery scan, then present the spectrum:
 > - "Update project boards or task lists"
 > - "Batch-create content"
 
-**Maps to**: working-style.md → Weekly Tasks section, feeds scheduled task setup, feeds skill recommendations
+**Maps to**: working-style.md → Weekly Routines section
 
 ### Q13: Tool Stack
 **Ask**: "Let's map out your tools. For each tool you use, tell me what you use it for."
@@ -304,13 +306,13 @@ Show real examples from the discovery scan, then present the spectrum:
 
 ## Post-Interview Notes
 
-After all 13 questions, the skill should have enough to generate:
-1. `context/about-me.md` — from Q1-Q4
-2. `context/voice-dna.md` — from Q5-Q8 + discovery scan writing samples
-3. `context/working-style.md` — from Q9-Q13
-4. Morning-brief skill — from Q3, Q7, Q9, Q11, Q13 + connected tools
-5. Inbox-triage skill — from Q2, Q3, Q10, Q11, Q13 + connected email
-6. Skill recommendations — from Q3, Q11, Q12
-7. CLAUDE.md — from Q10 + all context files + connected tools + self-correcting rules engine
+After all 13 questions, the skill should have enough to generate exactly four files:
 
-Before writing any files, show the user a preview of each context file and get their approval.
+1. `context/about-me.md` — from Q1-Q4
+2. `context/voice-dna.md` — from Q5-Q8 + the validated discovery writing samples + `voice-dna-base.md`
+3. `context/working-style.md` — from Q9-Q13
+4. `CLAUDE.md` — from Q10 + the context imports + connected tools + the self-correcting rules engine
+
+Nothing else gets generated. This onboarding does not create skills, does not recommend skills, and does not set up scheduled or recurring runs.
+
+Before writing any file, show the user a preview and get their approval.

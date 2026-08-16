@@ -1,25 +1,28 @@
 ---
-description: "Update specific parts of your workspace context"
+description: "Update one part of your workspace context — about you, your voice, or how you work"
 ---
 
-Ask the user which section they want to update:
+First confirm which folder is the workspace (the folder connected to this conversation), exactly as the `cowork-onboard:onboard` skill's Phase 0 does. Never assume a path, and never write outside the confirmed folder.
 
-1. **About me** — re-interview identity, role, business, expertise → regenerate `context/about-me.md`
-2. **Voice DNA** — re-scan all connected communication tools for fresh writing samples, ask for additional sources (newsletters, blog posts, social media), re-interview tone and style → regenerate `context/voice-dna.md`
-3. **Working style** — re-interview output preferences, rules, tasks, tool stack → regenerate `context/working-style.md`
-4. **Morning brief skill** — update the personalized morning brief at `.claude/skills/morning-brief/SKILL.md`
-5. **Inbox triage skill** — update the personalized inbox triage at `.claude/skills/inbox-triage/SKILL.md`
-6. **Everything** — re-run the full onboarding (same as `/onboard`)
+Then ask the user which part they want to update:
 
-For options 1-5: read the existing file first, show the user what's currently there, then use the `cowork-onboard:onboard` skill's support files to guide the update:
-- **About me** (option 1): load Section A from `interview-questions.md` for targeted questions
-- **Voice DNA** (option 2): re-run the discovery scan across ALL connected communication tools (email, Slack, etc.) for fresh writing samples. Then ask: "Any other places your writing lives now? Newsletters, blog posts, social media?" Collect additional samples. Run the context validation gate — ask the user to ruthlessly reject anything outdated or wrong. Then load Section B from `interview-questions.md`. Embed base rules from `voice-dna-base.md`
-- **Working style** (option 3): load Section C from `interview-questions.md` (includes tool stack quiz at Q13)
-- **Morning brief** (option 4): load `skill-templates.md` for the morning-brief template, re-ask relevant questions
-- **Inbox triage** (option 5): load `skill-templates.md` for the inbox-triage template, re-ask relevant questions
+1. **About me** — identity, role, business, expertise → `context/about-me.md`
+2. **Voice DNA** — how you write → `context/voice-dna.md`
+3. **Working style** — output preferences, rules, routines, tools → `context/working-style.md`
+4. **Everything** — run the full setup again (same as `/onboard`)
 
-Show the current content, ask targeted questions from the question bank (always include examples), then regenerate only the selected file. Preview changes before writing.
+For options 1-3, work through these steps in order:
 
-For option 6: use the `cowork-onboard:onboard` skill to run the full flow.
+1. **Read the existing file first** and show the user what's currently in it.
+2. **Ask targeted questions only** — load the matching section from the onboard skill's `interview-questions.md` (Section A for about me, Section B for voice, Section C for working style) and ask one question at a time, always with the examples.
+3. **For Voice DNA specifically:** if they want fresh writing samples, ask permission per source and name the account first ("I'd read about 20 of your own recent sent emails from `sam@acme.com` — OK?"), exactly as Phase 2 of the onboard skill does. A source they decline stays untouched. Then show what you found and let them reject anything outdated or wrong before it goes near the file. Keep the base rules from `voice-dna-base.md` at the top of the file.
+4. **Update, don't replace.** This is an edit, not a regeneration:
+   - Change only the sections the user actually discussed.
+   - Keep every other section byte-for-byte as it was, including anything they wrote or edited by hand, and any section this plugin never created.
+   - Never delete a section because it isn't in the template. If something looks out of place, ask before touching it.
+5. **Preview the change before writing** — show the sections that will change, old version and new version, and get an explicit yes.
+6. **Verify after writing** — read the file back and confirm the new content is there and the untouched sections survived.
 
-After updating, also check if `CLAUDE.md` needs changes to reflect the updates.
+For option 4, hand over to the `cowork-onboard:onboard` skill and let it run its own flow.
+
+Afterwards, check whether `CLAUDE.md` needs a matching tweak (for example a new tool in the Tools list). If it does, edit only those lines — never rewrite `CLAUDE.md` wholesale, and never touch the Learned Rules section.

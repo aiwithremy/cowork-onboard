@@ -2,7 +2,7 @@
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "cowork-onboard",
   "metadata": {
-    "description": "10-minute guided onboarding for Claude Cowork. One command builds your entire AI workspace."
+    "description": "Guided setup for Claude Cowork. One command builds your workspace folder and context files."
   },
   "owner": {
     "name": "AI with Remy",
@@ -11,8 +11,8 @@
   "plugins": [
     {
       "name": "cowork-onboard",
-      "description": "Guided onboarding that connects your tools, interviews you about your business, and builds a personalized AI workspace with context files, custom skills, and scheduled automation.",
-      "version": "1.0.0",
+      "description": "Guided setup that confirms your workspace folder, connects your tools, learns from the sources you approve, interviews you one question at a time, and builds your context files and master instructions.",
+      "version": "2.0.0",
       "author": {
         "name": "AI with Remy",
         "email": "remy@aiwithremy.com"

@@ -1,7 +1,7 @@
 {
   "name": "cowork-onboard",
-  "description": "10-minute guided onboarding for Claude Cowork. Connects tools, interviews you about your business, and builds a personalized AI workspace.",
-  "version": "1.0.0",
+  "description": "Guided setup for Claude Cowork: confirms your workspace folder, connects your tools, and builds your context files (about you, your voice, how you work) in about 20-30 minutes.",
+  "version": "2.0.0",
   "author": {
     "name": "AI with Remy"
   },

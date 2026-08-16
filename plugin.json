@@ -1,0 +1,15 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "cowork-onboard",
+  "version": "2.0.0",
+  "description": "Guided setup for Claude Cowork: confirms your workspace folder, connects your tools, and builds your context files (about you, your voice, how you work).",
+  "author": {
+    "name": "AI with Remy",
+    "email": "remy@aiwithremy.com",
+    "url": "https://aiwithremy.com"
+  },
+  "homepage": "https://aiwithremy.com",
+  "repository": "https://github.com/aiwithremy/cowork-onboard",
+  "license": "MIT",
+  "keywords": ["onboarding", "setup", "workspace", "context", "cowork"]
+}

@@ -1,7 +1,7 @@
 {
   "name": "cowork-onboard",
-  "description": "Guided setup for Claude Cowork: confirms your workspace folder, connects your tools, and builds your context files (about you, your voice, how you work) in about 20-30 minutes.",
-  "version": "2.0.0",
+  "description": "Guided setup for Claude Cowork: confirms your workspace folder, connects your tools, builds your context files (about you, your voice, how you work), and creates working folders that match your job, in about 25-35 minutes.",
+  "version": "2.1.0",
   "author": {
     "name": "AI with Remy"
   },

@@ -11,8 +11,8 @@
   "plugins": [
     {
       "name": "cowork-onboard",
-      "description": "Guided setup that confirms your workspace folder, connects your tools, learns from the sources you approve, interviews you one question at a time, and builds your context files and master instructions.",
-      "version": "2.0.0",
+      "description": "Guided setup that confirms your workspace folder, connects your tools, learns from the sources you approve, interviews you one question at a time, and builds your context files, your AGENTS.md instructions, and working folders that match your job.",
+      "version": "2.1.0",
       "author": {
         "name": "AI with Remy",
         "email": "remy@aiwithremy.com"

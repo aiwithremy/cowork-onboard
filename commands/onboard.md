@@ -1,5 +1,5 @@
 ---
-description: "Set up your AI workspace — connect your tools, answer a few questions, get your context files"
+description: "Set up your AI workspace — connect your tools, answer a few questions, get your context files and the folders your work lives in"
 ---
 
 Use the `cowork-onboard:onboard` skill to run the full onboarding flow.

@@ -1,16 +1,16 @@
 ---
 name: onboard
-description: Use when setting up an AI workspace in Claude Cowork, running guided onboarding, or building context files (CLAUDE.md, about-me, voice-dna, working-style) for a connected folder
+description: Use when setting up an AI workspace in Claude Cowork, running guided onboarding, or building a personal workspace (AGENTS.md instructions, a CLAUDE.md pointer, context files, and working folders that match the person's job) for a connected folder
 user-invocable: true
 ---
 
 # Cowork Onboard
 
-Guided onboarding that turns a connected folder into a personal AI workspace: the folder structure, three context files, and a master instructions file. This is both a setup tool AND a short lesson — the user should finish understanding what they built and why each piece matters.
+Guided onboarding that turns a connected folder into a personal AI workspace: one instructions file (`AGENTS.md`), a tiny `CLAUDE.md` pointer to it, three context files, and a set of working folders built from the person's actual job. This is both a setup tool AND a short lesson — the user should finish understanding what they built and why each piece matters.
 
 ## What this skill does and does NOT do
 
-**It does:** confirm which folder is connected, help the user connect their tools, verify those connections with real reads, learn from sources they explicitly approve, run a short interview one question at a time, preview every file, then create and verify the workspace.
+**It does:** confirm which folder is connected, help the user connect their tools, verify those connections with real reads, learn from sources they explicitly approve, run a short interview one question at a time, propose a folder structure that mirrors their real work, preview every file, then create and verify the workspace.
 
 **It does NOT:** create, save, or recommend skills. Set up scheduled or recurring runs. Send, post, reply to, or change anything in a connected tool. Write anywhere outside the folder the user has connected.
 
@@ -47,11 +47,11 @@ When this skill says "load [filename]", read it from that folder.
 
 > "Hey! I'm going to help you set up your AI workspace — a folder on your computer that holds everything I need to know about you, so every future conversation starts with me already understanding your business, how you write, and how you like to work.
 >
-> **Time:** about 20–30 minutes. Most of it is me asking you questions, so it moves at your pace.
+> **Time:** about 25–35 minutes. Most of it is me asking you questions, so it moves at your pace.
 >
 > **You can stop anytime.** I save our progress as we go, so if you close this or run out of time, we pick up where we left off.
 >
-> **What I'll do:** help you connect your tools, learn what I can from the ones you approve, ask you some questions, then build the folder and show you everything before I save it.
+> **What I'll do:** help you connect your tools, learn what I can from the ones you approve, ask you some questions, work out the folders your job actually needs, then build it all and show you everything before I save it.
 >
 > **What I won't do:** touch anything in your email or accounts — I'm read-only the whole way through. And I won't set anything running on a schedule."
 
@@ -81,7 +81,7 @@ Look at what's already in the confirmed folder, then propose one of two options 
 
 Record the agreed absolute path as **`WORKSPACE_ROOT`** and use it for every path from here on. Say it back once, plainly, and don't repeat it every message.
 
-**If a file called `CLAUDE.md` and a `context/` folder already exist at `WORKSPACE_ROOT`:** don't overwrite silently.
+**If an `AGENTS.md` (or `CLAUDE.md`) and a `context/` folder already exist at `WORKSPACE_ROOT`:** don't overwrite silently.
 > "This folder already has a workspace set up. I can start fresh and replace those files, or you can use `/update-context` to refresh just one part. Which would you prefer?"
 
 ### Step 0.4 — Resume check
@@ -117,14 +117,22 @@ The progress file is the only thing that makes "come back later" safe. Cowork do
   "tools": { "gmail": "connected", "google-calendar": "connected", "notion": "pending" },
   "discovery_validated": true,
   "answers": { "Q1": "Sam, freelance brand strategist", "Q2": "..." },
-  "files_written": ["context/about-me.md"]
+  "working_areas": {
+    "status": "approved",
+    "proposed": ["northwind/briefs", "northwind/ad-reports", "swipe-file"],
+    "approved": ["northwind/briefs", "northwind/ad-reports", "swipe-file"]
+  },
+  "files_written": ["context/about-me.md"],
+  "folders_created": ["context", "northwind/briefs"]
 }
 ```
 
-- `phase` is one of: `connect`, `consent`, `discovery`, `interview`, `build`, `complete`. The file is first written at the end of Phase 1, once `WORKSPACE_ROOT` is confirmed and there's something worth remembering.
+- `phase` is one of: `connect`, `consent`, `discovery`, `interview`, `working-areas`, `build`, `complete`. The file is first written at the end of Phase 1, once `WORKSPACE_ROOT` is confirmed and there's something worth remembering.
 - `answers` holds confirmed answers by question number, so a resumed run never re-asks them.
-- `files_written` lists context files already saved, so a resumed build continues at the next one.
-- On finishing, set `status: "complete"`, drop `answers`, and keep the `workspace_root` and `phase: "complete"`.
+- `working_areas` is the folder structure agreed in Phase 6: `proposed` is what you offered, `approved` is what the user actually signed off, each entry a path relative to `WORKSPACE_ROOT` written with forward slashes, one line per deepest folder. `status` is `proposed` or `approved`. **Write it as soon as you propose it**, so an interrupted run never loses the tree — a resumed run shows the saved tree back and asks whether it still stands instead of starting the design from scratch.
+- `files_written` lists files already saved and `folders_created` lists folders already made, so a resumed build continues where it stopped instead of redoing work.
+- On finishing, set `status: "complete"`, drop `answers`, and keep `workspace_root`, `working_areas.approved`, and `phase: "complete"`.
+- **The example values above are illustrative** — that tree belongs to one imaginary strategist, not to the person in front of you.
 
 **When to write it:** at the end of each phase, after each file is written, and after each tool is connected or skipped. Not after every single question — natural pause points only.
 
@@ -309,12 +317,14 @@ Wait. Remove or correct whatever they flag — no arguing. If they say it looks 
 
 ### Teach: what we're doing and what it becomes
 
-> "**Now the interview — around 13 questions**, one at a time. Nothing here has to be perfect; you can change any of it later with `/update-context`.
+> "**Now the interview — around 15 questions**, one at a time. Nothing here has to be perfect; you can change any of it later with `/update-context`.
 >
 > **Your answers become three files in your workspace:**
 > 1. **About Me** — your role, your business, what you're expert in
 > 2. **Voice DNA** — how you write, so I sound like you
 > 3. **Working Style** — how you like things done, your rules, your routines, your tools
+>
+> **And the last couple of questions build your folders** — the actual areas of your work, so this workspace looks like your job rather than a generic template.
 >
 > **Why files rather than me just remembering?** Because a new conversation starts blank. Files don't — they load every time you open this folder, and you can read and edit them yourself. It's a handbook for your AI.
 >
@@ -342,23 +352,108 @@ These should be heavily pre-filled. Show real samples with every voice question.
 **Section C: How you work (Q9–Q13).** Transition: "Last stretch — how you like to work, your rules, and your tools."
 
 Q13 (the tool map) earns its own line:
-> "**Last one — let's map your tools.** This is so I know where to look instead of asking you. If your meeting notes live in Granola, I'll go there. If client conversations only happen on Slack, I won't draft an email. The goal is fewer interruptions for you."
+> "**Let's map your tools.** This is so I know where to look instead of asking you. If your meeting notes live in Granola, I'll go there. If client conversations only happen on Slack, I won't draft an email. The goal is fewer interruptions for you."
+
+**Section D: The work itself (Q14–Q15).** Transition:
+> "**Two more, and these ones build your folders.** I want this workspace to match the work you actually do — so instead of dropping everything into one big pile, I'll make a folder for each real area of your job, and we'll shape it together in a minute."
+
+Q14 asks for their areas of work; Q15 asks what they repeatedly make or keep inside each one. Pre-fill both from the approved sources where you can — recurring client, project, or programme names in the documents, calendar entries, or channels they let you look at — and say where each suggestion came from. Never pre-fill from a declined source, and never present a ready-made list of standard folders for them to accept.
 
 ### After the interview
 
-> "That's all the questions. Now I'll turn your answers into your workspace files — and I'll show you each one before anything gets saved."
+> "That's all the questions. Next I'll sketch out your folders and show you the files — nothing gets created until you've seen it and said yes."
 
 ---
 
-## Phase 6: Preview the files
+## Phase 6: Design your working areas
+
+### Teach: your folders should look like your job
+
+> "**Now let's shape your folders.**
+>
+> Most setups hand you one generic folder for everything and leave you to sort it out later. I'd rather this workspace look like your actual job from day one — a folder for each real area of your work, so anything I make lands where you'd naturally go looking for it.
+>
+> These come from your answers, not from a template. Two people at the same company end up with completely different folders."
+
+### Step 6.1 — Draft the tree from what they actually told you
+
+Build the proposal from Q14 and Q15, plus anything that survived validation in Phase 4: recurring client, project, or programme names in the sources they approved, calendar or channel names, document titles. Never from a source they declined, and never from a standard list.
+
+Drafting rules:
+
+- **The top-level folders are their real areas of work**, named in their words. Three to seven is the healthy range; fewer is fine when the job genuinely is.
+- **Add a second level only where they named repeated, distinct things** they make or keep inside that area. One level is a perfectly good answer.
+- **Never invent a taxonomy.** No default set of folders, no scaffolding added because it looks tidy. If they didn't say it, it doesn't get a folder.
+- **Never assume clients or projects.** Plenty of jobs have neither, and forcing a client folder on someone who doesn't work that way makes the whole workspace feel wrong.
+- **Never turn a one-off into a folder.** Folders are for things that repeat.
+- **Thin answers mean a smaller tree.** Two honest folders beat six invented ones — say so out loud: "You gave me two clear areas, so I've kept it to two. We can add more any time."
+- **Folders only, no files.** Do not copy anything out of their email, documents, or messages into these folders. Moving real content in is a separate conversation with its own permission.
+
+Two illustrative shapes, to show how *different* the answers can be. They are examples, never a menu to choose from, and never a default:
+
+*Illustrative only — a creative strategist working across a few clients:*
+
+    northwind/
+      briefs/
+      ad-reports/
+    lumen-health/
+      briefs/
+      ad-reports/
+    swipe-file/
+
+*Illustrative only — an operations manager inside one company:*
+
+    suppliers/
+    finance/
+      invoices/
+    events/
+    team-onboarding/
+
+### Step 6.2 — Make the names safe before you show them
+
+- **Use their words, lightly tidied**: lowercase, spaces turned into hyphens, nothing but letters, digits and hyphens. Keep each name under about 40 characters.
+- **Strip what a file system fights over**: `/ \ : * ? " < > |`, leading dots, trailing dots and spaces.
+- **Reserved at the workspace root** — never propose a top-level folder named `context`, `AGENTS.md`, `CLAUDE.md`, `.onboard-progress.json`, or `onboarding-progress.md`, comparing case-insensitively (`Context` collides with `context`). If one of their areas genuinely goes by that name, explain the clash in one line and ask for a different folder name.
+- **Two areas that tidy down to the same name** — ask which they meant or ask for a name for each. Never silently merge them, and never append a number to make the clash go away.
+- **A folder of that name already exists** in the workspace — leave it exactly as it is, use it, and tell them it was already there. Never overwrite, merge, or delete anything of theirs.
+- **If tidying changed the meaning at all**, show the before and after and let them correct it: "You said 'Q4 / EMEA' — I'd call the folder `q4-emea`. Good, or would you name it differently?"
+
+### Step 6.3 — Show the tree, with a reason for every folder
+
+Save the draft to the progress file first (`working_areas` with `status: "proposed"`), so the tree survives even if the conversation ends on this message. Then show the whole thing in one message, followed by one plain line per top-level folder saying why it exists — traceable to something they told you, in their language:
+
+> "Here's what I'd build, based on what you told me:
+>
+>     [workspace folder]/
+>       [area]/
+>         [sub-area]/
+>       [area]/
+>
+> - **[area]/** — because you said [their words].
+> - **[area]/** — for the [thing they said they make every week].
+>
+> Change anything: rename them, drop the ones you'd never open, add what I've missed, or tell me to flatten it into fewer folders. What would you change?"
+
+### Step 6.4 — Get an explicit yes
+
+<HARD-GATE>
+Do NOT create a single folder until the user has approved the tree in this conversation. Silence is not approval, and a lukewarm "sure, fine" is worth one clarifying question.
+</HARD-GATE>
+
+Apply every correction they give and show the revised tree again. Then save progress (`phase: "working-areas"`) with `working_areas` holding both what you proposed and what they approved, so an interrupted run rebuilds the agreed tree instead of asking again.
+
+---
+
+## Phase 7: Preview the files
 
 ### Teach: what we're building
 
 > "**Here's the shape of your workspace:**
 >
-> - **CLAUDE.md** — your master instructions. The first thing I read in every new conversation.
+> - **AGENTS.md** — your instructions file. Who you are, how you write, how you work, and your rules. It's the first thing I read in a new conversation.
+> - **CLAUDE.md** — a one-line pointer to AGENTS.md, so Claude lands on the same instructions as any other AI tool. Nothing else lives in it.
 > - **context/** — your second brain: who you are, how you write, how you work.
-> - **active/** — where anything I make for you goes: research, drafts, exports. Keeps the rest tidy.
+> - **[their folders]** — the working areas we just agreed, where your actual work lives.
 >
 > Everything in there is plain text. You can open it, read it, edit it — it's yours, and it isn't locked inside any app."
 
@@ -464,13 +559,21 @@ From Q9–Q13:
 
 ### Tool Rules
 [tool-specific preferences from Q13, e.g. "client comms on Slack, never email"]
+
+## Work Areas
+
+The folders in this workspace and what belongs in each (agreed in setup, from Q14-Q15):
+
+| Folder | What lives in it |
+|---|---|
+| `[area]/` | [what they said this area is, and what they make in it] |
 ```
 
-### CLAUDE.md
+### AGENTS.md
 
 Teach it first:
 
-> "**The most important file: CLAUDE.md.**
+> "**The most important file: AGENTS.md.**
 >
 > It's the first thing I read in every new conversation. It pulls in your context files and holds your rules — so before we've said a word, I already know who you are, how you write, how you work, and what to avoid. You never have to explain yourself twice.
 >
@@ -493,9 +596,12 @@ The context folder is the source of truth for who [Name] is, how they write, how
 ## Workspace structure
 
     [workspace folder name]/
-    ├── CLAUDE.md          ← this file (master instructions)
+    ├── AGENTS.md          ← this file: the instructions every AI tool reads first
+    ├── CLAUDE.md          ← one line pointing here, so Claude loads the same instructions
     ├── context/           ← second brain (about-me, voice-dna, working-style)
-    └── active/            ← everything generated (research, drafts, exports)
+    ├── [area]/            ← [what this area of [Name]'s work is, in their words]
+    └── [area]/
+        └── [sub-area]/    ← [what [Name] makes or keeps in here]
 
 Keep this map up to date as the workspace grows, so a future session can navigate without exploring.
 
@@ -514,7 +620,8 @@ Keep this map up to date as the workspace grows, so a future session can navigat
 - Granola: meeting notes — check here for meeting context
 
 ### Rules
-- Everything generated goes in `active/`, in a sensible subfolder (`active/research/`, `active/drafts/`, `active/exports/`). Don't leave files loose at the root.
+- Work belongs in the area it's about: save what you make into the matching folder above, in the sub-folder that fits. Don't leave files loose at the workspace root, and ask [Name] before creating a new top-level folder.
+- Instructions live in this file. `CLAUDE.md` stays a one-line pointer to it — never move rules or context into it, and never keep a second copy of these instructions anywhere.
 [the hard rules from Q10, written as clear instructions]
 
 ---
@@ -541,6 +648,24 @@ A growing set of rules that makes this workspace better over time. **Read every 
 [Rules get added here as [Name] works]
 ```
 
+### CLAUDE.md
+
+Teach it in two lines, then show it:
+
+> "**And this one is deliberately tiny: CLAUDE.md.**
+>
+> Different AI tools look for their instructions under different file names. Claude looks for `CLAUDE.md`. So that file holds a single line pointing at `AGENTS.md` — Claude opens it, immediately loads your real instructions, and nothing has to be written twice. One set of instructions, no copies to keep in sync."
+
+```markdown
+# [Name]'s AI Workspace
+
+@AGENTS.md
+
+The instructions for this workspace live in `AGENTS.md`, which the line above loads into the conversation. This file exists only so Claude, which looks for a file with this name, lands on exactly the same instructions as every other tool. Don't add rules or context here — edit `AGENTS.md`.
+```
+
+Keep it to that. If you ever find yourself explaining a rule inside `CLAUDE.md`, the rule belongs in `AGENTS.md` instead.
+
 ### Approval
 
 Show the files one at a time and wait for a yes on each:
@@ -550,49 +675,62 @@ Show the files one at a time and wait for a yes on each:
 For Voice DNA, ask specifically:
 > "Here's your **Voice DNA** — this is how I'll write as you from now on. Have a proper look at the samples and patterns. Anything off?"
 
+For AGENTS.md, point out what it does:
+> "Here's your **AGENTS.md** — the instructions I'll read at the start of every conversation, including the folder map we agreed. Anything you'd change?"
+
+`CLAUDE.md` is one line and a sentence of explanation — show it, but there's nothing to decide.
+
 Make any changes they ask for and show it again. Nothing gets written without a yes.
 
 ---
 
-## Phase 7: Build it, then prove it
+## Phase 8: Build it, then prove it
 
 <HARD-GATE>
 Never say a folder or file was created until you have listed the path and seen it. If a write fails, say so plainly and stop — do not report success you didn't verify.
 </HARD-GATE>
 
-### Step 7.1 — Create the folders
+### Step 8.1 — Create the folders
 
 Using your file tools (not assumed terminal commands), create inside `WORKSPACE_ROOT`:
 
 - `context/`
-- `active/`
+- every folder in `working_areas.approved`, parents before children, exactly as approved — no extras, no renames, nothing "helpful" that wasn't on the list
 
-Then **list `WORKSPACE_ROOT` and check both appear.**
+Update `folders_created` in the progress file as you go. If a folder already exists, keep it and its contents untouched.
 
-### Step 7.2 — Write the approved files
+Then **list `WORKSPACE_ROOT`** (and each area that has sub-folders) **and check every approved folder appears.**
+
+### Step 8.2 — Write the approved files
 
 Write, one at a time, updating `files_written` in the progress file after each:
 
 - `[WORKSPACE_ROOT]/context/about-me.md`
 - `[WORKSPACE_ROOT]/context/voice-dna.md`
 - `[WORKSPACE_ROOT]/context/working-style.md`
+- `[WORKSPACE_ROOT]/AGENTS.md`
 - `[WORKSPACE_ROOT]/CLAUDE.md`
 
-### Step 7.3 — Verify and show the evidence
+The working-area folders stay empty of files — they are the person's own space, and nothing from their tools goes into them without a separate conversation.
 
-List the workspace folder and its `context/` folder, then show the user the real listing:
+### Step 8.3 — Verify and show the evidence
+
+List the workspace folder, its `context/` folder, and each working area that has sub-folders, then show the user the real listing:
 
 ```
 [workspace folder]/
+  AGENTS.md
   CLAUDE.md
   context/
     about-me.md
     voice-dna.md
     working-style.md
-  active/
+  [area]/
+    [sub-area]/
+  [area]/
 ```
 
-Every file above must appear in an actual listing before you claim the workspace is built. If something is missing: say which file didn't save, try once more, and if it still fails explain what you'd need (usually write access to that folder) instead of glossing over it.
+Check every file and every approved folder off against the real listing — from `working_areas.approved` in the progress file, not from memory. Only then can you say the workspace is built. If something is missing: name what didn't save, try once more, and if it still fails explain what you'd need (usually write access to that folder) instead of glossing over it.
 
 **If a write is refused** — the most likely cause is that the folder isn't connected with permission to write. Say that in plain words and ask them to connect it, then continue from here. Never redirect the files somewhere else without asking.
 
@@ -600,31 +738,43 @@ Save progress (`phase: "build"`).
 
 ---
 
-## Phase 8: Wrap up
+## Phase 9: Wrap up
+
+Show their real folder names here, not placeholders — read them back from `working_areas.approved`.
 
 > "**Your workspace is ready.** Here's what's in it and why it matters:
 >
 > **In `[workspace folder]`:**
-> - `CLAUDE.md` — master instructions, the first thing I read every session
+> - `AGENTS.md` — your instructions, the first thing I read every session
+> - `CLAUDE.md` — one line pointing at AGENTS.md, so Claude reads the same thing
 > - `context/about-me.md` — your role, business, expertise
 > - `context/voice-dna.md` — how you write, with real samples
 > - `context/working-style.md` — your preferences, rules, routines, tools
-> - `active/` — where anything I make for you lands
+>
+> **And your working areas — this is your live working space, not a demo:**
+>
+>     [area]/
+>       [sub-area]/
+>     [area]/
+>
+> - `[area]/` — [why it exists, in their words]
+>
+> Put your own files in there too. When you ask me for something, it goes in the folder it belongs to, so you always know where to look.
 >
 > **Built-in habits:**
 > - I look things up in your context and tools before asking you
-> - When you correct me, it becomes a permanent rule in CLAUDE.md
-> - Generated files go in `active/`, so the folder stays tidy
+> - When you correct me, it becomes a permanent rule in AGENTS.md
+> - What I make for you gets saved into the matching working area, so nothing piles up at the root
 >
 > **How to use it:** open this folder in Cowork whenever you want to work with me. Every new conversation starts with me already knowing who you are.
 >
-> **To change anything:** run `/update-context` and pick the part you want to refresh. Or just open the file and edit it yourself — it's plain text.
+> **To change anything:** run `/update-context` and pick the part you want to refresh — including adding a working area you've since realised you need. Or just open the file and edit it yourself — it's plain text.
 >
 > **What I deliberately didn't do:** I haven't created any skills and I haven't set anything running on a schedule. This setup is your foundation — nothing runs by itself.
 >
 > Try it: start a new conversation in this folder and ask me something about your business. You'll notice I already know the answer."
 
-Finally: write the progress file with `status: "complete"` and `phase: "complete"`, and confirm to yourself that `workspace_root` is saved.
+Finally: write the progress file with `status: "complete"` and `phase: "complete"`, and confirm to yourself that `workspace_root` and `working_areas.approved` are saved.
 
 ---
 
@@ -633,7 +783,7 @@ Finally: write the progress file with `status: "complete"` and `phase: "complete
 - **Warm, not cheesy.** Friendly, encouraging, calm.
 - **Teacher mode, briefly.** 2–4 sentences per explanation, never a lecture. Teach through doing.
 - **Short acknowledgements.** "Got it." "Perfect." "Makes sense."
-- **No jargon.** Say "tools" not "MCPs"; say "instructions file" until you've explained what CLAUDE.md is.
+- **No jargon.** Say "tools" not "MCPs"; say "instructions file" until you've explained what AGENTS.md is.
 - **Use everyday analogies.** A new hire's first day. A briefing document. An employee handbook.
 - **Show, don't quiz.** Where you can, show what you found and ask them to confirm it.
 - **Honest, always.** If something didn't work, say so. A cheerful false claim costs you all their trust.
@@ -647,6 +797,9 @@ Finally: write the progress file with `status: "complete"` and `phase: "complete
 - **Very short answers** → work with what you have. Don't push.
 - **They want to skip a question** → skip it and keep the section light.
 - **They want to stop** → save progress, then: "All saved. When you're ready, open this same folder in Cowork and run `/onboard` — I'll pick up right where we left off."
+- **They can't name their work areas** → don't fill the gap with a template. Reflect back what they said in the earlier questions ("you mentioned invoices and supplier chasing — are those two areas?"), propose the smallest honest tree, and say plainly that folders are easy to add later.
+- **A proposed folder name clashes** with `context`, `AGENTS.md`, `CLAUDE.md`, the progress file, another proposed area, or a folder already sitting in the workspace → say which name clashes and why, and ask for a different one. Never rename it silently, never number it, never overwrite what's already there.
+- **A folder can't be created** → name the folder, retry once, then say what's blocking it. Build the rest, and be explicit about which areas are missing rather than showing a tree that isn't real.
 - **A write fails** → name the file, retry once, then explain honestly what's blocking it.
 - **The progress file can't be written** → tell them resume won't be automatic, and offer the recap they can paste back.
 - **Connector cards don't render** → use `mcp-setup-guide.md`, and never claim a screen appeared.

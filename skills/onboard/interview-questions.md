@@ -225,7 +225,7 @@ Show real examples from the discovery scan, then present the spectrum:
 
 **Pre-fill**: Check SOPs, process docs, team guidelines from the discovery scan
 **Pre-fill prompt**: "I found these rules in your [source]: [list]. Want to keep these? Anything to add?"
-**Maps to**: working-style.md → Rules section, also feeds CLAUDE.md → Rules section
+**Maps to**: working-style.md → Rules section, also feeds AGENTS.md → Rules section
 
 ### Q11: Daily Repeated Tasks
 **Ask**: "What do you do every single day? Think about the tasks you repeat without thinking."
@@ -304,15 +304,56 @@ Show real examples from the discovery scan, then present the spectrum:
 
 ---
 
+## Section D: The Work Itself → the workspace folders
+
+These two questions decide what folders get built (Phase 6 of `SKILL.md`). The structure is an **output of the answers** — there is no default set of folders, and no list of standard areas to offer. Two people in the same company should end up with different trees.
+
+### Q14: Your areas of work
+**Ask**: "If I built folders for the work you actually do, what would they be? Think about the handful of areas your week divides into."
+**Format**: Free text, aiming for roughly 3-7 areas
+**Pre-fill**: From the approved sources only — names that keep recurring in the documents, calendar entries, channels, or threads they let you look at. Say where each suggestion came from, and let them reject it.
+**Pre-fill prompt**: "These names keep coming up in your [calendar/documents]: [X], [Y], [Z]. Are those real areas of your work, or just noise?"
+
+**Examples — illustrative only.** Show them to demonstrate how *different* these answers are, never as a menu to pick from:
+> "These are just to show the range — yours should be in your own words:"
+> - a strategist working across a few clients: "honestly it's client by client — Northwind, Lumen Health — plus a swipe file I keep adding to"
+> - an operations manager inside one company: "suppliers, finance, events, and onboarding new starters"
+> - a solo course creator: "the course itself, the newsletter, and my coaching clients"
+> - a support lead: "the help centre, escalations, and the monthly quality review"
+
+**If they're stuck**: reflect their earlier answers back rather than offering a template — "you mentioned invoicing and chasing suppliers; are those one area or two?"
+
+**Never**: assume they have clients, assume they have projects, or add an area they didn't name.
+
+**Maps to**: the top-level folders proposed in Phase 6, and working-style.md → Work Areas
+
+### Q15: What you make inside each area
+**Ask**, once per area they named: "Inside [area], what do you make or keep, again and again?"
+**Format**: Free text per area
+**Pre-fill**: From approved sources — the kinds of documents or recurring attachments that show up under that area's name.
+
+**Examples — illustrative only**, and only ever shown alongside the area they're talking about:
+> - inside a client area: "briefs, and the ad reports I send at the end of every month"
+> - inside a finance area: "invoices, mostly, and the supplier contracts"
+> - inside a content area: "scripts and thumbnails"
+
+**The point of this question**: repeated things become sub-folders. One-offs do not. If nothing comes to mind for an area, that area stays a single folder — say so, and make it clear that's a perfectly good answer.
+
+**Maps to**: the sub-folders proposed under each area in Phase 6, and working-style.md → Work Areas
+
+---
+
 ## Post-Interview Notes
 
-After all 13 questions, the skill should have enough to generate exactly four files:
+After all 15 questions, the skill should have enough to generate exactly five files and the person's own working folders:
 
 1. `context/about-me.md` — from Q1-Q4
 2. `context/voice-dna.md` — from Q5-Q8 + the validated discovery writing samples + `voice-dna-base.md`
-3. `context/working-style.md` — from Q9-Q13
-4. `CLAUDE.md` — from Q10 + the context imports + connected tools + the self-correcting rules engine
+3. `context/working-style.md` — from Q9-Q13, plus a Work Areas section from Q14-Q15
+4. `AGENTS.md` — the canonical instructions: Q10's rules, the `@context/` import, the connected tools, the workspace map, and the self-correcting rules engine
+5. `CLAUDE.md` — a pointer file: an `@AGENTS.md` line plus one sentence saying the instructions live there
+6. The working-area folders from Q14-Q15 — proposed, corrected by the user, approved, then created and verified in Phase 6 and Phase 8
 
 Nothing else gets generated. This onboarding does not create skills, does not recommend skills, and does not set up scheduled or recurring runs.
 
-Before writing any file, show the user a preview and get their approval.
+Before writing any file or creating any folder, show the user a preview and get their approval.

@@ -19,8 +19,17 @@ What it checks:
   7. Every support file referenced from a markdown file exists (no dangling
      references to deleted files).
   8. No stale term from the retired skill-building / scheduling flow survives
-     anywhere in the tracked text files.
+     anywhere in the tracked text files — including any surviving reference to
+     the removed generic `active/` output folder.
   9. The skill ends with a Self-Improvement Loop section.
+ 10. The generated workspace contract holds: the flow writes BOTH AGENTS.md and
+     CLAUDE.md, the AGENTS.md template imports the context folder, and the
+     CLAUDE.md template is a minimal signpost whose body is a bare @AGENTS.md
+     import line (no duplicated instructions).
+ 11. No text claims CLAUDE.md is the master/canonical instructions file.
+ 12. The personalised working-areas flow survives: the design phase, the
+     approval gate, the reserved-name guard, the resume-state key, the
+     verified creation step, and the completion recap.
 
 Exit 0 = clean. Exit 1 = at least one error.
 """
@@ -62,8 +71,10 @@ REQUIRED_FILES = [
 ]
 
 # Terms from the retired flow. Any hit is a regression: this product no longer
-# builds skills, saves skills, recommends skills, or schedules anything, and it
-# never hardcodes a workspace path or the obsolete install command.
+# builds skills, saves skills, recommends skills, or schedules anything, it
+# never hardcodes a workspace path or the obsolete install command, and it no
+# longer creates a generic `active/` catch-all folder — working folders are
+# derived from the person's own answers instead.
 FORBIDDEN_TERMS = [
     "morning-brief",
     "morning brief",
@@ -79,6 +90,23 @@ FORBIDDEN_TERMS = [
     "10-minute",
     "10 minute",
     "Desktop/OS",
+    "active/",
+    "/active",
+    "`active`",
+    "everything generated goes",
+    "where anything I make for you goes",
+]
+
+# Claims that CLAUDE.md still holds the instructions. AGENTS.md is canonical;
+# CLAUDE.md is only a signpost that imports it.
+STALE_MASTER_PATTERNS = [
+    re.compile(r"CLAUDE\.md[^\n]{0,120}?master instructions", re.IGNORECASE),
+    re.compile(r"master instructions[^\n]{0,120}?CLAUDE\.md", re.IGNORECASE),
+    re.compile(
+        r"CLAUDE\.md[^\n]{0,40}?\b(?:is|holds|contains)\b[^\n]{0,60}?"
+        r"(?:master|canonical|main)\b",
+        re.IGNORECASE,
+    ),
 ]
 
 # Frontmatter keys the current Claude/Cowork skill loader understands.
@@ -320,6 +348,160 @@ def check_forbidden_terms(report: Report) -> None:
                 report.error(f"{rel(path)}:{line_no}", f"stale term '{term}' from the retired flow")
 
 
+def check_no_stale_master_claims(report: Report) -> None:
+    """CLAUDE.md is a signpost. Nothing may still call it the instructions file."""
+    this_file = Path(__file__).resolve()
+    for path in text_files():
+        if path.resolve() == this_file:  # the checker spells the claim out on purpose
+            continue
+        text = path.read_text(encoding="utf-8")
+        for line_no, line in enumerate(text.splitlines(), 1):
+            for pattern in STALE_MASTER_PATTERNS:
+                if pattern.search(line):
+                    report.error(
+                        f"{rel(path)}:{line_no}",
+                        "stale claim that CLAUDE.md is the master instructions file — "
+                        "AGENTS.md is canonical and CLAUDE.md only imports it",
+                    )
+                    break
+
+
+def fenced_block_after(text: str, heading: str) -> str | None:
+    """Return the first fenced code block that follows an exact heading line."""
+    lines = text.splitlines()
+    try:
+        start = next(i for i, line in enumerate(lines) if line.strip() == heading)
+    except StopIteration:
+        return None
+    body: list[str] = []
+    inside = False
+    for line in lines[start + 1:]:
+        if not inside:
+            if line.startswith("```"):
+                inside = True
+            elif line.startswith("#"):
+                return None  # the next heading arrived before any code block
+            continue
+        if line.startswith("```"):
+            return "\n".join(body)
+        body.append(line)
+    return None
+
+
+def heading_section(text: str, heading_prefix: str) -> str | None:
+    """Return everything under a top-level heading, up to the next one."""
+    lines = text.splitlines()
+    try:
+        start = next(i for i, line in enumerate(lines) if line.startswith(heading_prefix))
+    except StopIteration:
+        return None
+    body: list[str] = []
+    for line in lines[start + 1:]:
+        if line.startswith("## "):
+            break
+        body.append(line)
+    return "\n".join(body)
+
+
+def check_generated_workspace_contract(report: Report) -> None:
+    """AGENTS.md is canonical; CLAUDE.md is a direct signpost that imports it."""
+    skill_path = ROOT / "skills" / "onboard" / "SKILL.md"
+    if not skill_path.is_file():
+        return  # already reported by check_required_files
+    text = skill_path.read_text(encoding="utf-8")
+    where = rel(skill_path)
+
+    agents_template = fenced_block_after(text, "### AGENTS.md")
+    if agents_template is None:
+        report.error(where, "no '### AGENTS.md' template block — the flow must generate AGENTS.md")
+    elif "@context/" not in agents_template:
+        report.error(where, "the AGENTS.md template must import the context folder with '@context/'")
+
+    claude_template = fenced_block_after(text, "### CLAUDE.md")
+    if claude_template is None:
+        report.error(where, "no '### CLAUDE.md' template block — the flow must generate CLAUDE.md")
+    else:
+        if "@AGENTS.md" not in [line.strip() for line in claude_template.splitlines()]:
+            report.error(
+                where,
+                "the CLAUDE.md template must carry a bare '@AGENTS.md' line so Claude "
+                "loads the canonical instructions immediately",
+            )
+        for duplicated in ("@context/", "Self-Correcting", "Learned Rules", "### Rules"):
+            if duplicated in claude_template:
+                report.error(
+                    where,
+                    f"the CLAUDE.md template must stay a signpost — found {duplicated!r} "
+                    "duplicated from AGENTS.md",
+                )
+        if len([line for line in claude_template.strip().splitlines()]) > 12:
+            report.error(where, "the CLAUDE.md template must stay minimal (12 lines or fewer)")
+
+    for target in ("[WORKSPACE_ROOT]/AGENTS.md", "[WORKSPACE_ROOT]/CLAUDE.md"):
+        if target not in text:
+            report.error(where, f"the build step never writes {target}")
+
+    build = heading_section(text, "## Phase 8: Build it")
+    if build is None:
+        report.error(where, "no '## Phase 8: Build it' section")
+    else:
+        for name in ("AGENTS.md", "CLAUDE.md"):
+            if name not in build:
+                report.error(where, f"the write/read-back verification never shows {name}")
+        if "working_areas.approved" not in build:
+            report.error(
+                where,
+                "the build step must create and verify the approved working areas from "
+                "'working_areas.approved'",
+            )
+
+    recap = heading_section(text, "## Phase 9: Wrap up")
+    if recap is None:
+        report.error(where, "no '## Phase 9: Wrap up' recap section")
+    else:
+        for name in ("AGENTS.md", "CLAUDE.md", "working areas"):
+            if name not in recap:
+                report.error(where, f"the completion recap never mentions {name}")
+
+
+def check_working_areas_flow(report: Report) -> None:
+    """Working folders are derived from the interview, approved, and verified."""
+    skill_path = ROOT / "skills" / "onboard" / "SKILL.md"
+    if skill_path.is_file():
+        text = skill_path.read_text(encoding="utf-8")
+        where = rel(skill_path)
+        required = {
+            "## Phase 6: Design your working areas":
+                "the working-areas design phase is missing",
+            "working_areas":
+                "the resume state never records the proposed/approved folder tree",
+            "`working-areas`":
+                "'working-areas' is missing from the progress file's phase list",
+            "Reserved at the workspace root":
+                "the reserved-name guard (context / AGENTS.md / CLAUDE.md / progress file) is missing",
+            "Never invent a taxonomy":
+                "the rule against inventing a folder taxonomy is missing",
+        }
+        for needle, message in required.items():
+            if needle not in text:
+                report.error(where, message)
+        if "illustrative only" not in text.lower():
+            report.error(where, "the example folder trees are not labelled illustrative")
+
+    bank_path = ROOT / "skills" / "onboard" / "interview-questions.md"
+    if bank_path.is_file():
+        bank = bank_path.read_text(encoding="utf-8")
+        where = rel(bank_path)
+        for needle, message in {
+            "### Q14": "the interview bank has no question about the person's work areas",
+            "### Q15": "the interview bank has no question about what they make in each area",
+        }.items():
+            if needle not in bank:
+                report.error(where, message)
+        if "illustrative only" not in bank.lower():
+            report.error(where, "the work-area examples are not labelled illustrative")
+
+
 def check_self_improvement_loop(skill_files: list[Path], report: Report) -> None:
     for skill_md in skill_files:
         text = skill_md.read_text(encoding="utf-8")
@@ -335,6 +517,9 @@ def main() -> int:
     skill_files = check_skills(report)
     check_support_references(report)
     check_forbidden_terms(report)
+    check_no_stale_master_claims(report)
+    check_generated_workspace_contract(report)
+    check_working_areas_flow(report)
     check_self_improvement_loop(skill_files, report)
 
     for warning in report.warnings:
